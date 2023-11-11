@@ -1,6 +1,16 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
 // import { axios } from "axios";
+const initMap = () => {
+  const container = document.getElementById("map");
+  const options = {
+    center: new kakao.maps.LatLng(33.450701, 126.570667),
+    level: 3,
+  };
+
+  const map = new kakao.maps.Map(container, options);
+  map.setMapTypeId(kakao.maps.MapTypeId.NORMAL);
+};
 
 onMounted(() => {
   // kakao api library를 가져오는 부분, kakao.maps를 통해 map method 접근
@@ -8,18 +18,7 @@ onMounted(() => {
 
   /* global kakao */
   // script download 후 그리기 실행
-  script.onload = () =>
-    kakao.maps.load(() => {
-      const container = document.getElementById("map");
-      const options = {
-        center: new kakao.maps.LatLng(33.450701, 126.570667),
-        level: 3,
-      };
-      console.log(kakao.maps);
-      console.log("OK ?");
-      const map = new kakao.maps.Map(container, options);
-      map.setMapTypeId(kakao.maps.MapTypeId.NORMAL);
-    });
+  script.onload = () => kakao.maps.load(initMap);
 
   script.src =
     "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=066c4bf5fb8745fcc2b066ec145bb938";
