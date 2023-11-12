@@ -1,7 +1,28 @@
 <script setup>
-defineProps({
-  userName: String,
+import { onMounted, ref /*watch*/ } from "vue";
+import { RouterLink } from "vue-router";
+
+const loginCheck = ref();
+const userName = ref("");
+
+onMounted(() => {
+  if (localStorage.getItem("userInfo")) {
+    loginCheck.value = true;
+    userName.value = JSON.parse(localStorage.getItem("userInfo")).userName;
+    console.log();
+  } else {
+    loginCheck.value = false;
+  }
 });
+
+// watch(userName, () => {
+//   window.location.reload();
+// });
+
+const logout = () => {
+  localStorage.clear();
+  window.location.reload();
+};
 </script>
 
 <template>
@@ -52,16 +73,30 @@ defineProps({
       </div>
 
       <!-- 로그인 X -->
-      <button
-        class="btn btn-outline-success"
-        type="button"
-        style="margin-right: 30px"
-      >
-        로그인
-      </button>
+
+      <div v-if="!loginCheck">
+        <router-link to="/signup">
+          <button
+            class="btn btn-outline-success"
+            type="button"
+            style="margin-right: 20px"
+          >
+            회원가입
+          </button>
+        </router-link>
+        <router-link to="/login">
+          <button
+            class="btn btn-outline-success"
+            type="button"
+            style="margin-right: 30px"
+          >
+            로그인
+          </button>
+        </router-link>
+      </div>
 
       <!-- 로그인 O -->
-      <!-- <div class="dropdown">
+      <div v-if="loginCheck" class="dropdown">
         <a
           class="btn dropdown-toggle"
           type="button"
@@ -69,13 +104,15 @@ defineProps({
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          사용자님 {{ userName }}
+          {{ userName }}님
         </a>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#">로그아웃</a></li>
+          <li>
+            <a class="dropdown-item" href="#" @click="logout">로그아웃</a>
+          </li>
           <li><a class="dropdown-item" href="#">마이페이지</a></li>
         </ul>
-      </div> -->
+      </div>
     </div>
   </nav>
 </template>
