@@ -3,6 +3,7 @@ import { ref } from "vue";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import router from "@/router";
+import {RouterLink} from "vue-router";
 
 const userInfo = ref(JSON.parse(localStorage.getItem("userInfo")));
 const URL = "//localhost:9090/";
@@ -131,9 +132,11 @@ const userDelete = () => {
               >
                 info modify
               </button>
-              <button class="btn btn-success" style="margin-right: 15px">
-                pw modify
-              </button>
+              <router-link to="/member/modify/pw">
+                <button class="btn btn-success" style="margin-right: 15px">
+                  pw modify
+                </button>
+              </router-link>
               <button class="btn btn-danger" @click.prevent="deleteModal">
                 delete
               </button>
