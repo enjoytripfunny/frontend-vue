@@ -94,6 +94,26 @@ const logout = () => {
           </button>
         </router-link>
       </div>
+      <div v-if="!loginCheck">
+        <router-link to="/signup">
+          <button
+            class="btn btn-outline-success"
+            type="button"
+            style="margin-right: 20px"
+          >
+            회원가입
+          </button>
+        </router-link>
+        <router-link to="/login">
+          <button
+            class="btn btn-outline-success"
+            type="button"
+            style="margin-right: 30px"
+          >
+            로그인
+          </button>
+        </router-link>
+      </div>
 
       <!-- 로그인 O -->
       <div v-if="loginCheck" class="dropdown">
