@@ -1,10 +1,10 @@
 <script setup>
-import MemberModify from "../components/Member/MemberModify.vue";
+import { RouterView } from "vue-router";
 </script>
 
 <template>
   <div>
-    <MemberModify></MemberModify>
+    <router-view></router-view>
   </div>
 </template>
 
