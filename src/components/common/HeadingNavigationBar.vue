@@ -112,7 +112,12 @@ const logout = () => {
           <li>
             <a class="dropdown-item" href="#" @click="logout">로그아웃</a>
           </li>
-          <li><a class="dropdown-item" href="#">마이페이지</a></li>
+
+          <li>
+            <router-link to="/member/modify"
+              ><a class="dropdown-item" href="#">마이페이지</a></router-link
+            >
+          </li>
         </ul>
       </div>
     </div>
