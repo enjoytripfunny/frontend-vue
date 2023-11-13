@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
-  userName: String
-})
+  userName: String,
+});
 </script>
 
 <template>
@@ -25,11 +25,14 @@ defineProps({
             </router-link>
           </li>
           <li class="nav-item nav-item-margin">
-            <router-link to="/attraction" class="nav-link" href="#">지도</router-link>
+            <router-link to="/attraction" class="nav-link" href="#"
+              >지도</router-link
+            >
           </li>
-
           <li class="nav-item nav-item-margin">
-            <a class="nav-link" href="#">게시판</a>
+            <router-link :to="{ name: 'trip-board' }" class="nav-link"
+              >게시판</router-link
+            >
           </li>
 
           <li class="nav-item nav-item-margin">
@@ -40,14 +43,20 @@ defineProps({
                 placeholder="검색..."
                 aria-label="Search"
               />
-              <button class="btn btn-outline-success" type="button">search</button>
+              <button class="btn btn-outline-success" type="button">
+                search
+              </button>
             </form>
           </li>
         </ul>
       </div>
 
       <!-- 로그인 X -->
-      <button class="btn btn-outline-success" type="button" style="margin-right: 30px">
+      <button
+        class="btn btn-outline-success"
+        type="button"
+        style="margin-right: 30px"
+      >
         로그인
       </button>
 

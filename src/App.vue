@@ -8,6 +8,7 @@ import HeadingNavigationBar from "./components/common/HeadingNavigationBar.vue";
   <div>
     <heading-navigation-bar />
     <h1>Enjoy Trip</h1>
+    <router-view></router-view>
   </div>
 </template>
 
