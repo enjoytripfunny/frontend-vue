@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import { Modal } from "bootstrap";
+import router from "@/router";
 
 const userInfo = ref(JSON.parse(localStorage.getItem("userInfo")));
 const URL = "//localhost:9090/";
@@ -33,6 +35,28 @@ const infoModify = () => {
             emailDomain: emailDomain.value,
           })
         );
+      }
+    });
+};
+
+const deleteModal = () => {
+  const myModal = new Modal(document.getElementById("delete"));
+  myModal.show();
+};
+
+const userDelete = () => {
+  // delete
+
+  axios
+    .get(URL + "member/delete", {
+      params: {
+        userId: userId.value,
+      },
+    })
+    .then((response) => {
+      if (response.data.msg === "success") {
+        localStorage.clear();
+        router.push({ path: "/" });
       }
     });
 };
@@ -110,8 +134,58 @@ const infoModify = () => {
               <button class="btn btn-success" style="margin-right: 15px">
                 pw modify
               </button>
-              <button class="btn btn-danger">delete</button>
+              <button class="btn btn-danger" @click.prevent="deleteModal">
+                delete
+              </button>
             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- delete modal -->
+    <div
+      class="modal fade"
+      id="delete"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- modal head -->
+          <div class="modal-header">
+            <h5 class="modal-title text-red" id="exampleModalLabel">
+              정말 삭제하시겠습니까?
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <!-- modal body-->
+          <div class="modal-body">
+            삭제 이후, 더 이상 계정을 사용할 수 없습니다.
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              style="margin-right: 15px"
+              data-bs-dismiss="modal"
+              @click="userDelete()"
+            >
+              delete
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              close
+            </button>
           </div>
         </div>
       </div>
