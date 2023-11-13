@@ -73,9 +73,8 @@ const logout = () => {
       </div>
 
       <!-- 로그인 X -->
-
       <div v-if="!loginCheck">
-        <router-link to="/signup">
+        <router-link to="/member/signup">
           <button
             class="btn btn-outline-success"
             type="button"
@@ -84,27 +83,7 @@ const logout = () => {
             회원가입
           </button>
         </router-link>
-        <router-link to="/login">
-          <button
-            class="btn btn-outline-success"
-            type="button"
-            style="margin-right: 30px"
-          >
-            로그인
-          </button>
-        </router-link>
-      </div>
-      <div v-if="!loginCheck">
-        <router-link to="/signup">
-          <button
-            class="btn btn-outline-success"
-            type="button"
-            style="margin-right: 20px"
-          >
-            회원가입
-          </button>
-        </router-link>
-        <router-link to="/login">
+        <router-link to="/member/login">
           <button
             class="btn btn-outline-success"
             type="button"
