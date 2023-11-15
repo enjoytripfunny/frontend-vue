@@ -47,8 +47,14 @@ const memberJoin = () => {
         emailDomain: emailDomain.value,
       })
       .then((response) => {
-        console.log(response);
-        router.push({ path: "/" });
+        console.log(response.data);
+
+        if (response.data.msg == "id check") {
+          // id check modal
+          new Modal(document.getElementById("idCheckModal")).show();
+        } else {
+          router.push({ path: "/" });
+        }
       });
   }
 };
@@ -199,6 +205,27 @@ const memberJoin = () => {
           </div>
           <!-- body -->
           <div class="modal-body">check both password</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- modal -->
+    <!-- 아이디 확인 -->
+    <div class="modal fade" id="idCheckModal">
+      <!-- modal-dialog 없으면 모달창 안뜸 -->
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- header -->
+          <div class="modal-header">
+            <h5 class="modal-title">join fail</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <!-- body -->
+          <div class="modal-body">exist id</div>
         </div>
       </div>
     </div>
