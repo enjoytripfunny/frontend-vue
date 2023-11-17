@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import TripBoardView from "../views/TripBoardView.vue";
+import MapRestoView from "../views/MapRestoView.vue";
 import BoardList from "@/components/tripboard/BoardList.vue";
 import BoardWrite from "@/components/tripboard/BoardWrite.vue";
 import BoardDetail from "@/components/tripboard/BoardDetail.vue";
@@ -93,6 +94,24 @@ const router = createRouter({
       path: "/image/test",
       name: "imagetest",
       component: () => import("@/components/Attraction/ImageUploadTest.vue"),
+    },
+    {
+      path: "/mapresto",
+      name: "mapresto",
+      component: MapRestoView,
+      redirect: { name: "mapresto-list" },
+      children: [
+        {
+          path: "list",
+          name: "mapresto-list",
+          component: () => import("@/components/mapresto/MapRestoList.vue"),
+        },
+        {
+          path: "register",
+          name: "mapresto-register",
+          component: () => import("@/components/mapresto/MapRestoReg.vue"),
+        },
+      ],
     },
   ],
 });
