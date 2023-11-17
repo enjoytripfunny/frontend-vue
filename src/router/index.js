@@ -12,12 +12,12 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: () => import("@/views/HomeView.vue")
+      component: () => import("@/views/HomeView.vue"),
     },
     {
       path: "/attraction",
       name: "attraction",
-      component: () => import("@/views/AttractionView.vue")
+      component: () => import("@/views/AttractionView.vue"),
     },
     {
       path: "/tripboard",
@@ -88,16 +88,20 @@ const router = createRouter({
       path: "/mapresto",
       name: "mapresto",
       component: MapRestoView,
-      // redirect: { name: "trip-board-list" },
+      redirect: { name: "mapresto-list" },
       children: [
+        {
+          path: "list",
+          name: "mapresto-list",
+          component: () => import("@/components/mapresto/MapRestoList.vue"),
+        },
         {
           path: "register",
           name: "mapresto-register",
           component: () => import("@/components/mapresto/MapRestoReg.vue"),
         },
       ],
-    }
-
+    },
   ],
 });
 

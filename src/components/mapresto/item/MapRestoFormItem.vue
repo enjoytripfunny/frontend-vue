@@ -1,16 +1,15 @@
 <script setup>
-import { ref, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import axios from "axios";
+// import { ref, watch } from "vue";
+// import { useRouter, useRoute } from "vue-router";
+// import axios from "axios";
 
-const router = useRouter();
-const route = useRoute();
-
-
+// const router = useRouter();
+// const route = useRoute();
 </script>
 
 <template>
-  <form @submit.prevent="onSubmit">
+  <h1>test</h1>
+  <!-- <form @submit.prevent="onSubmit">
     <div class="mb-3">
       <label for="userid" class="form-label">작성자 ID : </label>
       <input
@@ -57,7 +56,7 @@ const route = useRoute();
         목록으로이동...
       </button>
     </div>
-  </form>
+  </form> -->
 </template>
 
 <style scoped></style>

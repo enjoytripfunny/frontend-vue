@@ -85,7 +85,7 @@ const moveWrite = () => {
             </button>
           </div>
           <div class="col-md-5 offset-5">
-            <form class="d-flex">
+            <form class="d-flex" @submit.prevent="getArticleList">
               <VSelect :selectOption="selectOption" @onKeySelect="changeKey" />
               <div class="input-group input-group-sm">
                 <input

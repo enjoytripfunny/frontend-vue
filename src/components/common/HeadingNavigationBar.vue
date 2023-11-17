@@ -56,7 +56,18 @@ const logout = () => {
             >
           </li>
           <li class="nav-item nav-item-margin">
-            <router-link :to="{ name: 'mapresto-register' }" class="nav-link" href="#"
+            <router-link
+              :to="{ name: 'mapresto-list' }"
+              class="nav-link"
+              href="#"
+              >맛지도 보기</router-link
+            >
+          </li>
+          <li class="nav-item nav-item-margin">
+            <router-link
+              :to="{ name: 'mapresto-register' }"
+              class="nav-link"
+              href="#"
               >맛지도 등록</router-link
             >
           </li>

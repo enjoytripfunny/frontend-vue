@@ -1,5 +1,5 @@
 <script setup>
-import MapRestoFormItem from './item/MapRestoFormItem.vue';
+import MapRestoFormItem from "./item/MapRestoFormItem.vue";
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import MapRestoFormItem from './item/MapRestoFormItem.vue';
         </h2>
       </div>
       <div class="col-lg-10 text-start">
-        <MapRestoFormItem/>
+        <MapRestoFormItem />
       </div>
     </div>
   </div>
