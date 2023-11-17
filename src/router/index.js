@@ -11,12 +11,12 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: () => import("@/views/HomeView.vue")
+      component: () => import("@/views/HomeView.vue"),
     },
     {
       path: "/attraction",
       name: "attraction",
-      component: () => import("@/views/AttractionView.vue")
+      component: () => import("@/views/AttractionView.vue"),
     },
     {
       path: "/tripboard",
@@ -84,7 +84,16 @@ const router = createRouter({
         },
       ],
     },
-
+    {
+      path: "/makemap",
+      name: "makemap",
+      component: () => import("@/components/Attraction/MakeMap.vue"),
+    },
+    {
+      path: "/image/test",
+      name: "imagetest",
+      component: () => import("@/components/Attraction/ImageUploadTest.vue"),
+    },
   ],
 });
 
