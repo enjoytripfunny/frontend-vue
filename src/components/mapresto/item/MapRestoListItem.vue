@@ -1,15 +1,16 @@
 <script setup>
+defineProps({mapResto: Object})
 </script>
 
 <template>
   <li class="marRestoCardItem">
     <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" />
     <!-- width="285px" height="285px"  -->
-    <h6>제목 테스트</h6>
-    <span>작성자</span>
+    <h6>{{mapResto.subject}}</h6>
+    <span>{{mapResto.userId}}</span>
     <div>
       <span>작성 날짜 </span>
-      <span>2023.11.11</span>
+      <span>{{ mapResto.registerTime }}</span>
     </div>
   </li>
 </template>

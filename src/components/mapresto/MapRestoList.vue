@@ -12,7 +12,7 @@ const moveRegMapResto = () => {
 
 const listCount = ref(1);
 
-const marRestoList = ref([]);
+const mapRestoList = ref([]);
 
 onMounted(() => {
   getMapRestoList();
@@ -21,9 +21,10 @@ onMounted(() => {
 const getMapRestoList = () => {
   listMapResto(
     { num: listCount.value },
-    (response) => {
+    ({data}) => {
       listCount.value++;
-      console.log("getMapRestoList response: ", response);
+      mapRestoList.value = data;
+      console.log("getMapRestoList data: ", data);
     },
     (error) => console.log("getMapRestoList error: ", error)
   );
@@ -75,8 +76,9 @@ const getMapRestoList = () => {
         <div class="row align-self-center mb-2">
           <ul class="marRestoCard">
             <MapRestoListItem
-              v-for="number in 12"
-              :key="number"
+              v-for="mapResto in mapRestoList"
+              :key="mapResto.mapRestoNo"
+              :mapResto="mapResto"
             ></MapRestoListItem>
           </ul>
           <div class="more text-center">
