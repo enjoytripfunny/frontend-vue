@@ -1,8 +1,15 @@
 <script setup>
 import { onMounted, ref, toRaw } from "vue";
 import axios from "axios";
+import { start } from "@popperjs/core";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
+
+const BASIC_MARKER = "https://i1.daumcdn.net/dmaps/apis/n_local_blit_04.png";
+const STAR_IMG =
+  "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
+const CLICK_IMG =
+  "https://user-images.githubusercontent.com/70050038/284038352-dfe61846-ac5e-4ccd-9f64-a738a50fbc9e.png";
 
 const map = ref(); // map object
 const ps = ref(); // place search object
@@ -11,6 +18,9 @@ const infowindow = ref(); // marker's info window object
 
 const markers = ref([]); // markers
 const markersData = ref([]); // markers data 지도에 뜬 모든 마커의 데이터, 지도에 마커 찍을 때 사용
+
+const starMarkers = ref([]);
+const starMarkersData = ref([]);
 
 const registeredPlace = ref([]); // 등록된 장소(마커에서 추가한 장소)
 const subject = ref(); // 제목
@@ -37,7 +47,7 @@ const location = ref([
 ]);
 
 // 마커 그리는 함수
-const displayMarkers = (markersData) => {
+const displayMarkers = () => {
   // delete markers
   if (markers.value.length > 0) {
     markers.value.forEach((marker) => {
@@ -47,7 +57,7 @@ const displayMarkers = (markersData) => {
   }
 
   // create new markers, and save values at positions
-  const positions = markersData.map(
+  const positions = markersData.value.map(
     // based latitude longitude using kakao.maps method
     (markersData) => new kakao.maps.LatLng(markersData.y, markersData.x)
   );
@@ -60,6 +70,10 @@ const displayMarkers = (markersData) => {
         new kakao.maps.Marker({
           map: toRaw(map.value),
           position,
+          image: new kakao.maps.MarkerImage(
+            BASIC_MARKER,
+            new kakao.maps.Size(31, 35)
+          ),
         })
     );
 
@@ -71,12 +85,12 @@ const displayMarkers = (markersData) => {
           <div id="infowindow" class="info">
               <div class="title">
                   <div class="infowindow-header">
-                      <h3>${markersData[index].place_name}</h3>
+                      <h3>${markersData.value[index].place_name}</h3>
                       <div class="closeBtn" onclick="closeOverlay()" title="닫기"></div>
                   </div>
                   <div class="body">
                       <div>
-                          <div class="ellipsis">${markersData[index].road_address_name}</div>
+                          <div class="ellipsis">${markersData.value[index].road_address_name}</div>
                       </div>
                       <div>
 
@@ -91,17 +105,24 @@ const displayMarkers = (markersData) => {
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
+          // 이미 추가됐는지 체크
           for (var i = 0; i < registeredPlace.value.length; i++) {
-            if (registeredPlace.value[i].id === markersData[index].id) {
+            if (registeredPlace.value[i].id === markersData.value[index].id) {
               return;
             }
           }
-          registeredPlace.value.push(markersData[index]);
 
-          // 원하는 작업을 추가하세요.
+          markersData.value[index].registered = true;
+          markers.value[index].setImage(
+            new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35))
+          );
+          registeredPlace.value.push(markersData.value[index]);
+          console.log("register place >> ", registeredPlace.value);
         };
+
         // 클릭 이벤트에 인포윈도우 표시
         infowindow.value = new kakao.maps.InfoWindow({
+          zIndex: 1,
           content: infowindowContent,
           position: marker.getPosition(),
           removable: true,
@@ -113,8 +134,11 @@ const displayMarkers = (markersData) => {
   }
 };
 
-// map init setting
+// map init map setting // category : FD6 음식점 CE7 카페
 const initMap = () => {
+  infowindow.value = new kakao.maps.InfoWindow({ zIndex: 1 });
+
+  // start basic map
   const container = document.getElementById("map");
   const options = {
     center: new kakao.maps.LatLng(37.50378611, 127.0248221),
@@ -123,27 +147,60 @@ const initMap = () => {
 
   map.value = new kakao.maps.Map(container, options);
   map.value.setMapTypeId(kakao.maps.MapTypeId.NORMAL);
+  // end basic map
 
+  // start add control
   // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
-  var mapTypeControl = new kakao.maps.MapTypeControl();
-
-  // 지도에 컨트롤을 추가해야 지도위에 표시됩니다
-  // kakao.maps.ControlPosition은 컨트롤이 표시될 위치를 정의하는데 TOPRIGHT는 오른쪽 위를 의미합니다
+  const mapTypeControl = new kakao.maps.MapTypeControl();
   map.value.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
 
   // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
-  var zoomControl = new kakao.maps.ZoomControl();
+  const zoomControl = new kakao.maps.ZoomControl();
   map.value.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
-  // 지도 객체를 인자로 넣을경우, 검색(categorySearch)에 필요한 옵션들 중 location이 자동으로 현재 지도의 중심 좌표로 설정되어 검색을 시도한다.
-  // 필요에 따라서는 useMapBounds 옵션을 통해 현재 지도에 보여지는 영역을 자동 지정할 수 있다.
+  // end add control
 
-  ps.value = new kakao.maps.services.Places(map.value); // categorySearch(b, g, e), keywordSearch, setMap
-  ps.value.categorySearch("FD6", placesSearchCB, { useMapBounds: true });
+  // 각 카테고리에 클릭 이벤트를 등록합니다
+  addCategoryClickEvent();
 
-  infowindow.value = new kakao.maps.InfoWindow({ zIndex: 1 });
+  // 각 카테고리에 클릭 이벤트를 등록합니다
+  function addCategoryClickEvent() {
+    const category = document.getElementById("category");
+    const children = category.children;
+
+    for (var i = 0; i < children.length; i++) {
+      children[i].onclick = onClickCategory;
+    }
+  }
+
+  // 카테고리를 클릭했을 때 호출되는 함수입니다
+  function onClickCategory() {
+    // 카테고리 옵션 'X'
+    if (this.id === "") {
+      // delete markers
+      if (markers.value.length > 0) {
+        markers.value.forEach((marker) => {
+          //   console.log(marker);
+          marker.setMap(null);
+        });
+      }
+
+      return;
+    }
+
+    // 카테고리 id FD6, CE7
+    ps.value = new kakao.maps.services.Places(map.value);
+    ps.value.categorySearch(this.id, placesSearchCB, {
+      useMapBounds: true,
+    });
+  }
+
+  //   ps.value = new kakao.maps.services.Places(map.value); // categorySearch(b, g, e), keywordSearch, setMap
+  //   ps.value.categorySearch("FD6", placesSearchCB, { useMapBounds: true });
 
   // 키워드 검색 완료 시 호출되는 콜백함수 입니다
   function placesSearchCB(data, status) {
+    console.log(data);
+
     // delete markers
     if (markers.value.length > 0) {
       markers.value.forEach((marker) => marker.setMap(null));
@@ -175,18 +232,9 @@ const initMap = () => {
     });
 
     if (status === kakao.maps.services.Status.OK) {
-      displayMarkers(markersData.value);
+      displayMarkers();
     }
   }
-  // displayMarker(map.value, markersData.value);
-
-  kakao.maps.event.addListener(map.value, "dragend", function () {
-    // 지도 드래그가 끝날 때 수행할 동작
-    console.log("지도 드래그가 끝났습니다.");
-
-    ps.value = new kakao.maps.services.Places(map.value); // categorySearch(b, g, e), keywordSearch, setMap
-    ps.value.categorySearch("FD6", placesSearchCB, { useMapBounds: true });
-  });
 };
 
 onMounted(() => {
@@ -237,11 +285,12 @@ const searchPlace = () => {
         road_address_name: data.road_address_name,
         x: data.x,
         y: data.y,
+        registered: false,
       };
     });
 
     if (status === kakao.maps.services.Status.OK) {
-      displayMarkers(markersData.value);
+      displayMarkers();
       // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
       // LatLngBounds 객체에 좌표를 추가합니다
       var bounds = new kakao.maps.LatLngBounds();
@@ -260,11 +309,30 @@ const searchPlace = () => {
 
 // 등록된 장소 지우기
 const deletePlace = (id) => {
-  for (var i = 0; i < registeredPlace.value.length; i++) {
-    registeredPlace.value = registeredPlace.value.filter(
-      (place) => place.id !== id
-    );
+  //   별 모양 제거하고 일반 마크로 변경
+  for (var index = 0; index < markersData.value.length; index++) {
+    if (markersData.value[index].id === id) {
+      markers.value[index].setImage(
+        new kakao.maps.MarkerImage(BASIC_MARKER, new kakao.maps.Size(31, 35))
+      );
+    }
   }
+
+  for (index = 0; index < starMarkersData.value.length; index++) {
+    if (starMarkersData.value[index].id === id) {
+      starMarkers.value[index].setMap(null);
+    }
+  }
+
+  // 등록된 장소 목록에서 요소 제거
+  registeredPlace.value = registeredPlace.value.filter((place) => {
+    return place.id !== id;
+  });
+};
+
+// 등록된 장소 클릭 : 해당 위치로 이동
+const registeredPlaceClick = () => {
+  console.log("click ~!~!~!");
 };
 
 const uploadImageFile = ref(); // image source
@@ -334,9 +402,9 @@ const makeMap = () => {
 <template>
   <div>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-3">
         <!-- 검색 입력창과 버튼 -->
-        <div class="input-group mb-3">
+        <div class="input-group p-3">
           <input
             type="text"
             class="form-control"
@@ -359,7 +427,16 @@ const makeMap = () => {
     </div>
 
     <div class="row">
-      <div id="map" class="col-8"></div>
+      <div class="col-8">
+        <div class="map_wrap">
+          <div id="map" style="position: relative; overflow: hidden"></div>
+          <ul id="category" style="margin-left: 20px">
+            <li id="FD6" data-order="0" class="restaurant">음식점</li>
+            <li id="CE7" data-order="0" class="cafe">카페</li>
+            <li id="">X</li>
+          </ul>
+        </div>
+      </div>
       <div class="container mt-3 col-4">
         <div class="row justify-content-center">
           <div class="col-md-11">
@@ -405,6 +482,8 @@ const makeMap = () => {
                       v-for="place in registeredPlace"
                       :key="place.id"
                       :value="place.id"
+                      class="list-item"
+                      @click.prevent="registeredPlaceClick"
                     >
                       {{ place.place_name }}
                       <button
@@ -443,7 +522,7 @@ const makeMap = () => {
                   <div class="d-flex justify-content-end">
                     <button
                       type=""
-                      class="btn btn-primary"
+                      class="btn btn-primary mb-3"
                       data-bs-toggle=""
                       data-bs-target="#exampleModal"
                       id="loginbtn"
@@ -466,6 +545,60 @@ const makeMap = () => {
 #map {
   /* width: 100%; */
   height: 80vh;
+}
+
+/* wrapped map button */
+.map_wrap,
+.map_wrap * {
+  margin: 0;
+  padding: 0;
+  font-family: "Malgun Gothic", dotum, "돋움", sans-serif;
+  font-size: 12px;
+}
+.map_wrap {
+  position: relative;
+  width: 100%;
+  height: 350px;
+}
+#category {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 2px;
+  border: 1px solid #909090;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  background: #fff;
+  overflow: hidden;
+  z-index: 2;
+}
+#category li {
+  float: left;
+  list-style: none;
+  width: 50px;
+  height: 35px;
+  line-height: 25px;
+  border-right: 1px solid #acacac;
+  padding: 6px 0;
+  text-align: center;
+  cursor: pointer;
+}
+#category li.on {
+  background: #eee;
+}
+#category li:hover {
+  background: #94befc;
+  border-left: 1px solid #acacac;
+  margin-left: -1px;
+}
+#category li:last-child {
+  margin-right: 0;
+  border-right: 0;
+}
+#category li span {
+  display: block;
+  margin: 0 auto 3px;
+  width: 27px;
+  height: 28px;
 }
 .list-group-item {
   flex: 1; /* 모든 리스트 아이템이 동일한 너비를 갖도록 함 */
@@ -497,5 +630,11 @@ const makeMap = () => {
 .slide-item {
   flex: 0 0 auto; /* 가로 크기를 자동으로 조정하지 않고 고정으로 유지 */
   scroll-snap-align: start; /* 스크롤 시 스냅할 위치 설정 */
+}
+
+/* 호버 시 이미지 변경 */
+.list-item:hover {
+  background-image: url("https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png");
+  /* 다른 스타일 */
 }
 </style>
