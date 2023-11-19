@@ -7,7 +7,7 @@ import { listMapResto } from "@/api/map-resto.js";
 const router = useRouter();
 
 const moveRegMapResto = () => {
-  router.push({ name: "trip-board-write" });
+  router.push({ name: "makemap" });
 };
 
 const listCount = ref(1);

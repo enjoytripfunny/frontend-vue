@@ -274,7 +274,8 @@ const onFileSelected = (event) => {
   if (input.files /* && input.files[0] */) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      uploadImageFile.value = e.target.result; // image source 매우 긴 영어
+      uploadImageFile.value = input; // image source 매우 긴 영어
+      // uploadImageFile.value = e.target.result; // image source 매우 긴 영어
     };
     reader.readAsDataURL(input.files[0]);
   }
@@ -305,11 +306,18 @@ const restoMap = ref({
   userId: "ssafy", //맛지도 만든 사용자 아이디
   subject: subject.value, //맛지도 제목
   content: content.value, //맛지도 간단 설명
-  fileInfo: uploadImageFile.value, //맛지도 썸네일
-  restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
-  tags: tags.value, //맛지도에 대한 태그
+  fileInfo: null,//uploadImageFile.value, //맛지도 썸네일
+  restos: null, //맛지도안에 맛집들의 api 아이디
+  // restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
+  tags: null, //맛지도에 대한 태그
+  // tags: tags.value, //맛지도에 대한 태그
   registerTime: "", //맛지도 만들어진 날짜
 });
+
+
+const postData = ref({
+  content: restoMap.value
+})
 
 // 기본적인 설정
 const axiosInstance = axios.create({
@@ -324,12 +332,40 @@ const axiosInstance = axios.create({
 const makeMap = () => {
   console.log("make map !!!");
 
-  axiosInstance
-    .post("/mapresto/test", restoMap.value)
+  
+  const formData = new FormData();
+  formData.append("fileInfo", uploadImageFile.value.files[0]);
+  // formData.append("fileInfo", uploadImageFile.value);
+  formData.append("content", JSON.stringify(restoMap.value));
+
+  
+    // .post("/mapresto", restoMap.value)
+    axios.post("http://localhost:9090/mapresto/reg", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      }
+    }) 
+    // {
+    //   params: restoMap.value,
+    //   // params: postData.value,
+    // })
     .then((response) => console.log(response))
     .catch((error) => console.log(error));
-};
-</script>
+  };
+  </script>
+// const makeMap = () => {
+//   console.log("make map !!!");
+
+//   axiosInstance
+//     // .post("/mapresto", restoMap.value)
+//     .post("/mapresto/reg", formData.value) 
+//     // {
+//     //   params: restoMap.value,
+//     //   // params: postData.value,
+//     // })
+//     .then((response) => console.log(response))
+//     .catch((error) => console.log(error));
+// };
 
 <template>
   <div>
@@ -379,7 +415,7 @@ const makeMap = () => {
                 <div>
                   <input type="file" @change="onFileSelected" />
                 </div>
-                <form action="">
+                <form action="" >
                   <div class="mb-3">
                     <label for="subject" class="form-label">글 제목</label>
                     <input

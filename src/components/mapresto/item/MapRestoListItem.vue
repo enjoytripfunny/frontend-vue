@@ -1,13 +1,42 @@
 <script setup>
-defineProps({mapResto: Object})
+import { ref, watch } from "vue";
+import axios from "axios";
+
+const mapRestoProps = defineProps({mapResto: Object})
+const mapResto = mapRestoProps.mapResto;
+// console.log("mapResto: ", mapResto);
+// console.log("mapResto.mapResto.fileInfo.saveFile",  mapResto.fileInfo.saveFile);
+// const imgSrc = "@/assets/img/busan.jpg";
+
+const like = ref(false);
+const likeInfo = ref({
+  userId: "ssafy",
+  likeValue: 1,
+  mapRestoNo: 1
+})
+
+const changeLike = () => {
+  like.value = like.value == true ? false : true;
+  likeInfo.value.likeValue = like.value == true ? 1 : -1;
+  changeLike(likeInfo.value,     
+  (response) => {
+    console.log("changeLike response: " + response);
+    },
+  (error) => console.error(error))
+}
+
 </script>
 
 <template>
   <li class="marRestoCardItem">
-    <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" />
-    <!-- width="285px" height="285px"  -->
+    <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
+    <img :src="`/src/assets/img/${mapResto.fileInfo.saveFile}`" style="width: 230px; height: 230px" />
+    <div style="display: flex;">
     <h6>{{mapResto.subject}}</h6>
-    <span>{{mapResto.userId}}</span>
+    <img v-show="like.value == false" src="@/assets/img/beforeLike.png" style="width: 20px; height: 20px; margin-left: 170px;" @click="changeLike"/>
+    <img v-show="like.value == true" src="@/assets/img/afterLike.png" style="width: 20px; height: 20px; margin-left: 170px;" @click="changeLike"/>
+  </div>
+    <span>{{mapResto.userId}}</span> 
     <div>
       <span>작성 날짜 </span>
       <span>{{ mapResto.registerTime }}</span>
