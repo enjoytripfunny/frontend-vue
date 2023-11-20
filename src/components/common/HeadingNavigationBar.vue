@@ -1,27 +1,41 @@
 <script setup>
 import { onMounted, ref /*watch*/ } from "vue";
 import { RouterLink } from "vue-router";
+import { useMenuStore } from "@/stores/menu";
+import { storeToRefs } from "pinia";
 
-const loginCheck = ref();
+const menuStore = useMenuStore();
+// 반응형을 유지하면서 스토어에서 속성을 추출하려면, storeToRefs()를 사용
+// https://pinia.vuejs.kr/core-concepts/
+const { menuList } = storeToRefs(menuStore);
+const { changeMenuState } = menuStore;
+
 const userName = ref("");
 
 onMounted(() => {
-  if (localStorage.getItem("userInfo")) {
+  /*if (localStorage.getItem("userInfo")) {
     loginCheck.value = true;
     userName.value = JSON.parse(localStorage.getItem("userInfo")).userName;
     console.log();
   } else {
     loginCheck.value = false;
-  }
+  }*/
 });
 
 // watch(userName, () => {
 //   window.location.reload();
 // });
 
+// const logout = () => {
+//   localStorage.clear();
+//   window.location.reload();
+// };
+
 const logout = () => {
+  console.log("로그아웃!!!!");
   localStorage.clear();
-  window.location.reload();
+  sessionStorage.clear();
+  changeMenuState();
 };
 </script>
 
@@ -68,7 +82,8 @@ const logout = () => {
               :to="{ name: 'mapresto-register' }"
               class="nav-link"
               href="#"
-              >맛지도 등록</router-link>
+              >맛지도 등록</router-link
+            >
           </li>
 
           <li class="nav-item nav-item-margin">
@@ -87,51 +102,78 @@ const logout = () => {
         </ul>
       </div>
 
-      <!-- 로그인 X -->
-      <div v-if="!loginCheck">
-        <router-link to="/member/signup">
-          <button
-            class="btn btn-outline-success"
-            type="button"
-            style="margin-right: 20px"
-          >
-            회원가입
-          </button>
-        </router-link>
-        <router-link to="/member/login">
-          <button
-            class="btn btn-outline-success"
-            type="button"
-            style="margin-right: 30px"
-          >
-            로그인
-          </button>
-        </router-link>
-      </div>
-
-      <!-- 로그인 O -->
-      <div v-if="loginCheck" class="dropdown">
-        <a
-          class="btn dropdown-toggle"
-          type="button"
-          id="dropdownMenuButton"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          {{ userName }}님
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li>
-            <a class="dropdown-item" href="#" @click="logout">로그아웃</a>
-          </li>
-
-          <li>
-            <router-link to="/member/modify"
-              ><a class="dropdown-item" href="#">마이페이지</a></router-link
+      <div>
+        <!-- 로그인 X -->
+        <div v-if="!menuList[4].show">
+          <router-link to="/member/signup">
+            <button
+              class="btn btn-outline-success"
+              type="button"
+              style="margin-right: 20px"
             >
-          </li>
-        </ul>
+              회원가입
+            </button>
+          </router-link>
+          <router-link to="/member/login">
+            <button
+              class="btn btn-outline-success"
+              type="button"
+              style="margin-right: 30px"
+            >
+              로그인
+            </button>
+          </router-link>
+        </div>
+
+        <!-- 로그인 O -->
+        <div v-else class="dropdown">
+          <a
+            class="btn dropdown-toggle"
+            type="button"
+            id="dropdownMenuButton"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            {{ userName }}님
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li>
+              <a class="dropdown-item" href="#" @click="logout">로그아웃</a>
+            </li>
+
+            <li>
+              <router-link to="/member/modify"
+                ><a class="dropdown-item" href="#">마이페이지</a></router-link
+              >
+            </li>
+          </ul>
+        </div>
       </div>
+
+      <!-- router login bar -->
+      <!-- <ul
+        class="navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll"
+        style="--bs-scroll-height: 100px"
+      >
+        <template v-for="menu in menuList" :key="menu.routeName">
+          <template v-if="menu.show">
+            <template v-if="menu.routeName === 'user-logout'">
+              <li class="nav-item">
+                <router-link to="/" @click.prevent="logout" class="nav-link">{{
+                  menu.name
+                }}</router-link>
+              </li>
+            </template>
+            <template v-else>
+              <li class="nav-item">
+                <router-link :to="{ name: menu.routeName }" class="nav-link">{{
+                  menu.name
+                }}</router-link>
+              </li>
+            </template>
+          </template>
+        </template>
+      </ul> -->
     </div>
   </nav>
 </template>
