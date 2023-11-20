@@ -27,6 +27,8 @@ const subject = ref(); // 제목
 const content = ref(); // 글
 const tags = ref([]); // 지역 태그 최대 3개(서울, 대전 ...)
 
+const restos = ref([]);
+
 const location = ref([
   "서울",
   "인천",
@@ -104,10 +106,15 @@ const displayMarkers = () => {
         // 내 지도에 추가 버튼 클릭 시 실행되는 함수
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
+          console.log(markers.value[index]);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
+
           // 이미 추가됐는지 체크
           for (var i = 0; i < registeredPlace.value.length; i++) {
-            if (registeredPlace.value[i].id === markersData.value[index].id) {
+            if (
+              registeredPlace.value[i].restoApiId ===
+              markersData.value[index].id
+            ) {
               return;
             }
           }
@@ -116,8 +123,17 @@ const displayMarkers = () => {
           markers.value[index].setImage(
             new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35))
           );
-          registeredPlace.value.push(markersData.value[index]);
+          registeredPlace.value.push({
+            restoApiId: markersData.value[index].id,
+            restoName: markersData.value[index].place_name,
+            restoPhone: markersData.value[index].phone,
+            category: markersData.value[index].category_group_code,
+            address: markersData.value[index].address_name,
+            latitude: markersData.value[index].y,
+            longitude: markersData.value[index].x,
+          });
           console.log("register place >> ", registeredPlace.value);
+          infowindow.value.close();
         };
 
         // 클릭 이벤트에 인포윈도우 표시
@@ -326,7 +342,7 @@ const deletePlace = (id) => {
 
   // 등록된 장소 목록에서 요소 제거
   registeredPlace.value = registeredPlace.value.filter((place) => {
-    return place.id !== id;
+    return place.restoApiId !== id;
   });
 };
 
@@ -375,7 +391,7 @@ const restoMap = ref({
   content: content.value, //맛지도 간단 설명
   fileInfo: uploadImageFile.value, //맛지도 썸네일
   restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
-  tags: tags.value, //맛지도에 대한 태그
+  tags: selectLocation.value, //맛지도에 대한 태그
   registerTime: "", //맛지도 만들어진 날짜
 });
 
@@ -389,13 +405,53 @@ const axiosInstance = axios.create({
 });
 
 // 만들기 버튼 클릭 이벤트
+// const makeMap = () => {
+
+//   console.log("make map !!!");
+//   console.log(restoMap.value.restos[0]);
+//   axiosInstance
+//     .post("/mapresto/reg", restoMap.value)
+//     .then((response) => console.log(response))
+//     .catch((error) => console.log(error));
+// };
 const makeMap = () => {
   console.log("make map !!!");
+  console.log(selectLocation);
+  const formData = new FormData();
+  formData.append("file", uploadImageFile.value.files[0]);
+  // // formData.append("fileInfo", uploadImageFile.value);
+  // // formData.append("content", "test");
+  formData.append("userId", "ssafy");
+  formData.append("subject", "제목 test");
+  formData.append("content", "testtest");
+  // formData.append("restoInfo", JSON.stringify(resData));
+  formData.append("restos", JSON.stringify(resData));
+  // formData.append("registerTime", "");
+  // formData.append("content", JSON.stringify(restoMap.value));
 
-  axiosInstance
-    .post("/mapresto/test", restoMap.value)
+  // // .post("/mapresto", restoMap.value)
+  axios
+    .post("http://localhost:9090/mapresto/reg", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        // "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    // {
+    //   params: restoMap.value,
+    //   // params: postData.value,
+    // })
     .then((response) => console.log(response))
     .catch((error) => console.log(error));
+  // registMapResto(
+  //   restoMap.value,
+  //   (response) => {
+  //     console.log("registMapResto response의 값: " + response);
+  //   },
+  //   (error) => {
+  //     console.error(error);
+  //   }
+  // );
 };
 </script>
 
@@ -480,17 +536,17 @@ const makeMap = () => {
                   <ul>
                     <li
                       v-for="place in registeredPlace"
-                      :key="place.id"
-                      :value="place.id"
+                      :key="place.restoApiId"
+                      :value="place.restoApiId"
                       class="list-item"
                       @click.prevent="registeredPlaceClick"
                     >
-                      {{ place.place_name }}
+                      {{ place.restoName }}
                       <button
                         type="button"
                         class="btn-close"
                         aria-label="Close"
-                        @click.prevent="deletePlace(place.id)"
+                        @click.prevent="deletePlace(place.restoApiId)"
                       ></button>
                     </li>
                   </ul>
