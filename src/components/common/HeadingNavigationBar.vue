@@ -68,7 +68,16 @@ const logout = () => {
               :to="{ name: 'mapresto-register' }"
               class="nav-link"
               href="#"
-              >맛지도 등록</router-link>
+              >맛지도 등록</router-link
+            >
+          </li>
+          <li class="nav-item nav-item-margin">
+            <router-link
+              :to="{ name: 'mapresto-combine' }"
+              class="nav-link"
+              href="#"
+              >지도 합치기</router-link
+            >
           </li>
 
           <li class="nav-item nav-item-margin">

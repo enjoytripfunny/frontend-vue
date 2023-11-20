@@ -1,16 +1,21 @@
 <script setup>
 import { onMounted, ref, toRaw } from "vue";
+
+import { useRouter } from "vue-router";
 import axios from "axios";
 import { registMapResto } from "../../api/map-resto";
 import { start } from "@popperjs/core";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
+
 const BASIC_MARKER = "https://i1.daumcdn.net/dmaps/apis/n_local_blit_04.png";
 const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
 const CLICK_IMG =
   "https://user-images.githubusercontent.com/70050038/284038352-dfe61846-ac5e-4ccd-9f64-a738a50fbc9e.png";
+
+const router = useRouter();
 
 const map = ref(); // map object
 const ps = ref(); // place search object
@@ -105,10 +110,16 @@ const displayMarkers = () => {
         // 내 지도에 추가 버튼 클릭 시 실행되는 함수
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
+          console.log(markers.value[index]);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
+
+
           // 이미 추가됐는지 체크
           for (var i = 0; i < registeredPlace.value.length; i++) {
-            if (registeredPlace.value[i].id === markersData.value[index].id) {
+            if (
+              registeredPlace.value[i].restoApiId ===
+              markersData.value[index].id
+            ) {
               return;
             }
           }
@@ -117,8 +128,18 @@ const displayMarkers = () => {
           markers.value[index].setImage(
             new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35))
           );
-          registeredPlace.value.push(markersData.value[index]);
+
+          registeredPlace.value.push({
+            restoApiId: markersData.value[index].id,
+            restoName: markersData.value[index].place_name,
+            restoPhone: markersData.value[index].phone,
+            category: markersData.value[index].category_group_code,
+            address: markersData.value[index].address_name,
+            latitude: markersData.value[index].y,
+            longitude: markersData.value[index].x,
+          });
           console.log("register place >> ", registeredPlace.value);
+          infowindow.value.close();
         };
 
         // 클릭 이벤트에 인포윈도우 표시
@@ -417,14 +438,16 @@ const resData = [
   },
 ];
 
+const tagsTest = ["대전", "서울"];
+
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
   console.log("make map !!!");
 
-  for (let index = 0; index < registeredPlace.length; index++) {
-    console.log("test" + registeredPlace.value[index].res);
+  for (let index = 0; index < registeredPlace.value.length; index++) {
+    console.log("test: ", registeredPlace.value[index]);
   }
-  console.log("registeredPlace: " + registeredPlace.value);
+  console.log("registeredPlace: ", registeredPlace.value.target);
 
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
@@ -433,23 +456,39 @@ const makeMap = () => {
   formData.append("userId", "ssafy");
   formData.append("subject", "제목 test");
   formData.append("content", "testtest");
-  formData.append("restos", JSON.stringify(resData));
+  formData.append("tags", tagsTest);
+  // formData.append("restoInfo", JSON.stringify(resData));
+  // formData.append("restos", JSON.stringify(resData));
+
+  resData.forEach((data, index) => {
+    formData.append(`restos[${index}].restoApiId`, data.restoApiId);
+    formData.append(`restos[${index}].restoName`, data.restoName);
+    formData.append(`restos[${index}].restoPhone`, data.restoPhone);
+    formData.append(`restos[${index}].category`, data.category);
+    formData.append(`restos[${index}].address`, data.address);
+    formData.append(`restos[${index}].latitude`, data.latitude);
+    formData.append(`restos[${index}].longitude`, data.longitude);
+    // ... append other RestoDto fields
+  });
   // formData.append("registerTime", "");
   // formData.append("content", JSON.stringify(restoMap.value));
 
   // // .post("/mapresto", restoMap.value)
   axios
     .post("http://localhost:9090/mapresto/reg", formData, {
-      // headers: {
-      //   "Content-Type": "multipart/form-data",
-      //   // "Content-Type": "application/json;charset=utf-8",
-      // },
+      headers: {
+        "Content-Type": "multipart/form-data",
+        // "Content-Type": "application/json;charset=utf-8",
+      },
     })
     // {
     //   params: restoMap.value,
     //   // params: postData.value,
     // })
-    .then((response) => console.log(response))
+    .then((response) => {
+      console.log(response);
+      router.push({ name: "mapresto-list" });
+    })
     .catch((error) => console.log(error));
   // registMapResto(
   //   restoMap.value,

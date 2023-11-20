@@ -111,6 +111,16 @@ const router = createRouter({
           name: "mapresto-register",
           component: () => import("@/components/mapresto/MapRestoReg.vue"),
         },
+        {
+          path: "combine",
+          name: "mapresto-combine",
+          component: () => import("@/components/mapresto/MapCombine.vue"),
+        },
+        {
+          path: "view/:maprestono",
+          name: "mapresto-view",
+          component: () => import("@/components/mapresto/MapRestoView.vue"),
+        },
       ],
     },
   ],
