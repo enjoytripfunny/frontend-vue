@@ -394,18 +394,14 @@ const optionClick = (locate) => {
 const restoMap = ref({
   mapRestoNo: 0, //맛지도 인덱스
   userId: "ssafy", //맛지도 만든 사용자 아이디
-  subject: subject.value, //맛지도 제목
-  content: content.value, //맛지도 간단 설명
+  subject: "", //맛지도 제목
+  content: "", //맛지도 간단 설명
   // fileInfo: null, //uploadImageFile.value, //맛지도 썸네일
   // restos: null, //맛지도안에 맛집들의 api 아이디
   // restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
   // tags: null, //맛지도에 대한 태그
   // tags: tags.value, //맛지도에 대한 태그
   registerTime: "", //맛지도 만들어진 날짜
-});
-
-const postData = ref({
-  content: restoMap.value,
 });
 
 // 기본적인 설정
@@ -439,6 +435,8 @@ const resData = [
 ];
 
 const tagsTest = ["대전", "서울"];
+const subjectValue = ref('');
+const contentValue = ref('');
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
@@ -447,20 +445,22 @@ const makeMap = () => {
   for (let index = 0; index < registeredPlace.value.length; index++) {
     console.log("test: ", registeredPlace.value[index]);
   }
-  console.log("registeredPlace: ", registeredPlace.value.target);
+  console.log("registeredPlace: ", registeredPlace.value);
 
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
   // // formData.append("fileInfo", uploadImageFile.value);
   // // formData.append("content", "test");
   formData.append("userId", "ssafy");
-  formData.append("subject", "제목 test");
-  formData.append("content", "testtest");
-  formData.append("tags", tagsTest);
+  formData.append("subject", subjectValue.value);
+  formData.append("content", contentValue.value);
+  // formData.append("tags", tagsTest);
+
+  console.log("tags value: ", selectLocation.value[0]);
   // formData.append("restoInfo", JSON.stringify(resData));
   // formData.append("restos", JSON.stringify(resData));
 
-  resData.forEach((data, index) => {
+  registeredPlace.value.forEach((data, index) => {
     formData.append(`restos[${index}].restoApiId`, data.restoApiId);
     formData.append(`restos[${index}].restoName`, data.restoName);
     formData.append(`restos[${index}].restoPhone`, data.restoPhone);
@@ -470,6 +470,10 @@ const makeMap = () => {
     formData.append(`restos[${index}].longitude`, data.longitude);
     // ... append other RestoDto fields
   });
+
+  selectLocation.value.forEach((data, index) => {
+    formData.append(`tags[${index}]`, data);
+  })
   // formData.append("registerTime", "");
   // formData.append("content", JSON.stringify(restoMap.value));
 
@@ -572,7 +576,7 @@ console.log(error)); // };
                       class="form-control"
                       id="subject"
                       placeholder="제목 입력"
-                      v-model="subject"
+                      v-model="subjectValue"
                     />
                   </div>
                   <div class="mb-3">
@@ -582,7 +586,7 @@ console.log(error)); // };
                       class="form-control"
                       id="content"
                       placeholder="글 입력"
-                      v-model="content"
+                      v-model="contentValue"
                     />
                   </div>
                   <ul>
