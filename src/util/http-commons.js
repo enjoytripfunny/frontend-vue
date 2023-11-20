@@ -12,6 +12,16 @@ function localAxios() {
   return instance;
 }
 
+function formAxios() {
+  const instance = axios.create({
+    baseURL: VITE_VUE_API_URL,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return instance;
+}
+
 // JWT 토큰 사용시
 
 // function localAxios() {
@@ -86,4 +96,4 @@ function localAxios() {
 //   return instance;
 // }
 
-export { localAxios };
+export { localAxios, formAxios };

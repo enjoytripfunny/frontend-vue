@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, toRaw } from "vue";
 import axios from "axios";
+import { registMapResto } from "../../api/map-resto";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
@@ -306,18 +307,17 @@ const restoMap = ref({
   userId: "ssafy", //맛지도 만든 사용자 아이디
   subject: subject.value, //맛지도 제목
   content: content.value, //맛지도 간단 설명
-  fileInfo: null,//uploadImageFile.value, //맛지도 썸네일
-  restos: null, //맛지도안에 맛집들의 api 아이디
+  // fileInfo: null, //uploadImageFile.value, //맛지도 썸네일
+  // restos: null, //맛지도안에 맛집들의 api 아이디
   // restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
-  tags: null, //맛지도에 대한 태그
+  // tags: null, //맛지도에 대한 태그
   // tags: tags.value, //맛지도에 대한 태그
   registerTime: "", //맛지도 만들어진 날짜
 });
 
-
 const postData = ref({
-  content: restoMap.value
-})
+  content: restoMap.value,
+});
 
 // 기본적인 설정
 const axiosInstance = axios.create({
@@ -328,31 +328,72 @@ const axiosInstance = axios.create({
   },
 });
 
+const resData = [
+  {
+    restoApiId: "test",
+    restoName: "test",
+    restoPhone: "test",
+    category: "test",
+    address: "test",
+    latitude: "test",
+    longitude: "test",
+  },
+  {
+    restoApiId: "test",
+    restoName: "test",
+    restoPhone: "test",
+    category: "test",
+    address: "test",
+    latitude: "test",
+    longitude: "test",
+  },
+];
+
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
   console.log("make map !!!");
 
-  
-  const formData = new FormData();
-  formData.append("fileInfo", uploadImageFile.value.files[0]);
-  // formData.append("fileInfo", uploadImageFile.value);
-  formData.append("content", JSON.stringify(restoMap.value));
+  for (let index = 0; index < registeredPlace.length; index++) {
+    console.log("test" + registeredPlace.value[index].res);
+  }
+  console.log("registeredPlace: " + registeredPlace.value);
 
-  
-    // .post("/mapresto", restoMap.value)
-    axios.post("http://localhost:9090/mapresto/reg", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      }
-    }) 
+  const formData = new FormData();
+  formData.append("file", uploadImageFile.value.files[0]);
+  // // formData.append("fileInfo", uploadImageFile.value);
+  // // formData.append("content", "test");
+  formData.append("userId", "ssafy");
+  formData.append("subject", "제목 test");
+  formData.append("content", "testtest");
+  formData.append("restos", JSON.stringify(resData));
+  // formData.append("registerTime", "");
+  // formData.append("content", JSON.stringify(restoMap.value));
+
+  // // .post("/mapresto", restoMap.value)
+  axios
+    .post("http://localhost:9090/mapresto/reg", formData, {
+      // headers: {
+      //   "Content-Type": "multipart/form-data",
+      //   // "Content-Type": "application/json;charset=utf-8",
+      // },
+    })
     // {
     //   params: restoMap.value,
     //   // params: postData.value,
     // })
     .then((response) => console.log(response))
     .catch((error) => console.log(error));
-  };
-  </script>
+  // registMapResto(
+  //   restoMap.value,
+  //   (response) => {
+  //     console.log("registMapResto response의 값: " + response);
+  //   },
+  //   (error) => {
+  //     console.error(error);
+  //   }
+  // );
+};
+</script>
 // const makeMap = () => {
 //   console.log("make map !!!");
 
@@ -415,7 +456,7 @@ const makeMap = () => {
                 <div>
                   <input type="file" @change="onFileSelected" />
                 </div>
-                <form action="" >
+                <form action="">
                   <div class="mb-3">
                     <label for="subject" class="form-label">글 제목</label>
                     <input

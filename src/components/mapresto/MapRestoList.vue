@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import MapRestoListItem from "./item/MapRestoListItem.vue";
 import { listMapResto } from "@/api/map-resto.js";
@@ -11,6 +11,15 @@ const moveRegMapResto = () => {
 };
 
 const listCount = ref(1);
+const totalMapResto = ref(12);
+const maxPage = ref(1);
+// const calMaxPage = computed(() => {
+//   maxPage.value = Math.ceil(totalMapResto.value / 12);
+// })
+watch(totalMapResto, (newData, oldData) => {
+  maxPage.value = Math.ceil(totalMapResto.value / 12);
+  console.log("maxPage.value: " + maxPage.value);
+});
 
 const mapRestoList = ref([]);
 
@@ -20,14 +29,26 @@ onMounted(() => {
 
 const getMapRestoList = () => {
   listMapResto(
-    { num: listCount.value },
-    ({data}) => {
-      listCount.value++;
-      mapRestoList.value = data;
-      console.log("getMapRestoList data: ", data);
+    { num: listCount.value, total: totalMapResto.value },
+    ({ data }) => {
+      mapRestoList.value = data.list;
+      totalMapResto.value = data.total;
+      console.log("getMapRestoList list: ", data.list);
+      console.log("getMapRestoList total: ", data.total);
     },
     (error) => console.log("getMapRestoList error: ", error)
   );
+};
+
+const addList = () => {
+  if (totalMapResto.value >= listCount.value) {
+    listCount.value = listCount.value + 1;
+    getMapRestoList();
+  }
+  // if (maxPage.value >= listCount.value) {
+  //   listCount.value++;
+  //   getMapRestoList();
+  // }
 };
 </script>
 
@@ -82,7 +103,11 @@ const getMapRestoList = () => {
             ></MapRestoListItem>
           </ul>
           <div class="more text-center">
-            <button class="btn btn-outline-success" type="button">
+            <button
+              class="btn btn-outline-success"
+              type="button"
+              @click="addList"
+            >
               더보기+
             </button>
           </div>
