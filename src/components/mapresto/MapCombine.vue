@@ -1,6 +1,10 @@
 <script setup>
 import { listMyMapResto, listLikeMapResto } from "@/api/map-resto.js";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
+
+const myMapList = ref([]);
+const likeMapList = ref([]);
 
 const myMapResto = () => {
   listMyMapResto(
@@ -8,8 +12,9 @@ const myMapResto = () => {
       num: 1,
       userId: "ssafy",
     },
-    (response) => {
-      console.log("listMyMapResto response: ", response);
+    ({data}) => {
+      myMapList.value = data.myMapList;
+      console.log("listMyMapResto data: ", myMapList.value);
     },
     (error) => console.log("listMyMapResto error: ", error)
   );
@@ -21,8 +26,9 @@ const likeMapResto = () => {
       num: 1,
       userId: "ssafy",
     },
-    (response) => {
-      console.log("listLikeMapResto response: ", response);
+    ({data}) => {
+      likeMapList.value = data.likeMapList;
+      console.log("listLikeMapResto data: ", data);
     },
     (error) => console.log("listLikeMapResto error: ", error)
   );
@@ -51,9 +57,21 @@ onMounted(() => {
       <div class="col-lg-6">
         <div class="row">
           <h3>나의 지도 리스트</h3>
+          <ul class="mapRestoCard">
+          <MapRestoCombineListItem 
+          v-for="mapResto in myMapList" 
+          :key="mapResto.mapRestoNo" 
+          :mapResto="mapResto">
+          </MapRestoCombineListItem>
+        </ul>
         </div>
         <div class="row">
           <h3>좋아요 지도 리스트</h3>
+          <MapRestoCombineListItem 
+          v-for="mapResto in likeMapList" 
+          :key="mapResto.mapRestoNo" 
+          :mapResto="mapResto">
+          </MapRestoCombineListItem>
         </div>
       </div>
     </div>
@@ -61,4 +79,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.mapRestoCard {
+  list-style-type: none;
+  display: flex;
+  /* flex-wrap: wrap; */
+}
 </style>

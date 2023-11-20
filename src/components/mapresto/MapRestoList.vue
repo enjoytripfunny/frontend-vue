@@ -95,7 +95,7 @@ const addList = () => {
         </div>
 
         <div class="row align-self-center mb-2">
-          <ul class="marRestoCard">
+          <ul class="mapRestoCard">
             <MapRestoListItem
               v-for="mapResto in mapRestoList"
               :key="mapResto.mapRestoNo"
@@ -118,7 +118,7 @@ const addList = () => {
 </template>
 
 <style scoped>
-.marRestoCard {
+.mapRestoCard {
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;

@@ -1,15 +1,21 @@
 <script setup>
+import { ref } from 'vue';
+
+const mapResto = defineProps({mapResto: Object});
+console.log("mapResto", mapResto.mapResto);
+
 </script>
 
 <template>
   <li class="marRestoCardItem">
+    
     <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
     <img
-      :src="`/src/assets/231120/${mapResto.fileInfo.saveFile}`"
+      :src="`/src/assets/231120/${mapResto.mapResto.fileInfo.saveFile}`"
       style="width: 150px; height: 200px"
     />
-    <div style="display: flex">
-      <h6>{{ mapResto.subject }}</h6>
+    <div>
+      <h6>{{ mapResto.mapResto.subject }}</h6>
     </div>
   </li>
 </template>

@@ -7,8 +7,7 @@ import { registMapResto } from "../../api/map-resto";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
-<<<<<<< Updated upstream
-=======
+
 const BASIC_MARKER = "https://i1.daumcdn.net/dmaps/apis/n_local_blit_04.png";
 const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
@@ -16,7 +15,7 @@ const CLICK_IMG =
   "https://user-images.githubusercontent.com/70050038/284038352-dfe61846-ac5e-4ccd-9f64-a738a50fbc9e.png";
 
 const router = useRouter();
->>>>>>> Stashed changes
+
 const map = ref(); // map object
 const ps = ref(); // place search object
 
@@ -103,15 +102,34 @@ const displayMarkers = (markersData) => {
         // 내 지도에 추가 버튼 클릭 시 실행되는 함수
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
+          console.log(markers.value[index]);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
+
+          // 이미 추가됐는지 체크
           for (var i = 0; i < registeredPlace.value.length; i++) {
-            if (registeredPlace.value[i].id === markersData[index].id) {
+            if (
+              registeredPlace.value[i].restoApiId ===
+              markersData.value[index].id
+            ) {
               return;
             }
           }
-          registeredPlace.value.push(markersData[index]);
 
-          // 원하는 작업을 추가하세요.
+          markersData.value[index].registered = true;
+          markers.value[index].setImage(
+            new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35))
+          );
+          registeredPlace.value.push({
+            restoApiId: markersData.value[index].id,
+            restoName: markersData.value[index].place_name,
+            restoPhone: markersData.value[index].phone,
+            category: markersData.value[index].category_group_code,
+            address: markersData.value[index].address_name,
+            latitude: markersData.value[index].y,
+            longitude: markersData.value[index].x,
+          });
+          console.log("register place >> ", registeredPlace.value);
+          infowindow.value.close();
         };
         // 클릭 이벤트에 인포윈도우 표시
         infowindow.value = new kakao.maps.InfoWindow({
