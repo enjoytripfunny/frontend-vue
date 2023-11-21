@@ -8,8 +8,9 @@ function listMapResto(param, success, fail) {
   local.get(`/mapresto`, { params: param }).then(success).catch(fail);
 }
 
-function changeLike(param, success, fail) {
-  local.post(`/mapresto/like`).then(success).catch(fail);
+// 좋아요 값 변경
+function registerLike(likeInfo, success, fail) {
+  local.post(`/mapresto/like`, likeInfo).then(success).catch(fail);
 }
 
 // 맛지도 생성
@@ -40,7 +41,7 @@ function getUserMapResto(param, success, fail) {
 
 export {
   listMapResto,
-  changeLike,
+  registerLike,
   registMapResto,
   listMyMapResto,
   listLikeMapResto,

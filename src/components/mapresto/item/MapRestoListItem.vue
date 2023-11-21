@@ -1,24 +1,28 @@
 <script setup>
 import { ref, watch } from "vue";
 import axios from "axios";
+import { registerLike } from '@/api/map-resto';
 
 const mapRestoProps = defineProps({ mapResto: Object });
 const mapResto = mapRestoProps.mapResto;
+const like = ref();
+like.value = mapResto.likeValue == 1 ? 1 : -1;
+console.log("변경 전 like: ", like.value);
 console.log("mapResto: ", mapResto);
-console.log("mapResto.mapResto.fileInfo.saveFile", mapResto.fileInfo.saveFile);
 // const imgSrc = "@/assets/img/busan.jpg";
 
-const like = ref(false);
+// const like = ref(false);
 const likeInfo = ref({
   userId: "ssafy",
-  likeValue: 1,
-  mapRestoNo: 1,
+  likeValue: "",
+  mapRestoNo: mapResto.mapRestoNo,
 });
 
 const changeLike = () => {
-  like.value = like.value == true ? false : true;
-  likeInfo.value.likeValue = like.value == true ? 1 : -1;
-  changeLike(
+    like.value = like.value == 1 ? -1 : 1;
+    console.log("변경된 like: ", like.value);
+    likeInfo.value.likeValue = like.value;
+  registerLike(
     likeInfo.value,
     (response) => {
       console.log("changeLike response: " + response);
@@ -60,20 +64,22 @@ const changeLike = () => {
       </router-link>
     </template>
     <div style="display: flex">
+      <div style="display: flex">
       <h6>{{ mapResto.subject }}</h6>
 
       <img
-        v-show="like.value == false"
+        v-show="like == -1"
         src="@/assets/img/beforeLike.png"
-        style="width: 20px; height: 20px; margin-left: 170px"
+        style="width: 20px; height: 20px; margin-left: auto"
         @click="changeLike"
       />
       <img
-        v-show="like.value == true"
+        v-show="like == 1"
         src="@/assets/img/afterLike.png"
-        style="width: 20px; height: 20px; margin-left: 170px"
+        style="width: 20px; height: 20px; margin-left: auto"
         @click="changeLike"
       />
+    </div>
     </div>
     <span>{{ mapResto.userId }}</span>
     <div>

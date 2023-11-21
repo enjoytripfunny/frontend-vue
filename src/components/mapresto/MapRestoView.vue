@@ -1,7 +1,7 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
-import { getMapRestoView, getUserMapResto } from "@/api/map-resto.js";
+import { getMapRestoView } from "@/api/map-resto.js";
 
 const route = useRoute();
 const { maprestono } = route.params;
@@ -11,29 +11,21 @@ const restoList = ref([]); // 맛지도에 저장된 식당들 저장
 
 onMounted(() => {
   getMapResto();
-  getResto();
 });
 
-// 맛지도에 대한 제목, 작성자, 내용, 작성 날짜
+// 맛지도에 대한 제목, 작성자, 내용, 작성 날짜, 식당들
 const getMapResto = () => {
   getMapRestoView(
     maprestono,
     ({ data }) => {
-      mapRestoView.value = data.mapResto;
+      mapRestoView.value = data.mapResto; // 식당 제외 맛지도 데이터
+      restoList.value = data.userRestoList;
       console.log("getMapResto data: ", data);
     },
     (error) => {
       console.error(error);
     }
   );
-};
-
-// 맛지도에 저장한 식당들 가져오기
-const getResto = () => {
-  getUserMapResto({ mapRestoNo: maprestono }, (response) => {
-    // restoList.value = data.userRestoList;
-    console.log("getUserMapResto response: ", response);
-  });
 };
 </script>
 
