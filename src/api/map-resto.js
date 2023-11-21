@@ -39,6 +39,12 @@ function getUserMapResto(param, success, fail) {
   local.get(`/mapresto/userResto`, { params: param }).then(success).catch(fail);
 }
 
+// 화면 캡처 테스트용
+// function captureImg(mapresto, success, fail) {
+//   form.post(`/mapresto/reg`, mapresto).then(success).catch(fail);
+//   // local.post(`/mapresto/reg`, JSON.stringify(article)).then(success).catch(fail);
+// }
+
 export {
   listMapResto,
   registerLike,
@@ -47,4 +53,5 @@ export {
   listLikeMapResto,
   getMapRestoView,
   getUserMapResto,
+  // captureImg
 };

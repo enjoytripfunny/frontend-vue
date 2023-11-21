@@ -3,6 +3,7 @@ import { onMounted, ref, toRaw } from "vue";
 
 import { useRouter } from "vue-router";
 import axios from "axios";
+import html2canvas from 'html2canvas';
 import { registMapResto } from "../../api/map-resto";
 import { start } from "@popperjs/core";
 
@@ -522,18 +523,37 @@ const subjectValue = ref("");
 const contentValue = ref("");
 
 // 만들기 버튼 클릭 이벤트
-const makeMap = () => {
+const makeMap = async () => {
   console.log("make map !!!");
+  // ----------------------------------
 
+  const captureArea = document.getElementById("map");
+  const canvas = await html2canvas(captureArea);
+  const imgBase64 = canvas.toDataURL();
+  // const imgBase64 = canvas.toDataURL('image/jpeg', 'image/octet-stream');
+  const decodImg = atob(imgBase64.split(',')[1]);
+
+  let array = [];
+  for (let i = 0; i < decodImg .length; i++) {
+    array.push(decodImg .charCodeAt(i));
+  }
+
+  const file = new Blob([new Uint8Array(array)], {type: 'image/png'});
+  const fileName = 'capture_img_' + new Date().getMilliseconds() + '.png';
+  
+  // ----------------------------------
+  
   const formData = new FormData();
-  formData.append("file", uploadImageFile.value.files[0]);
+  // formData.append("file", uploadImageFile.value.files[0]);
+  
+  formData.append('file', file, fileName);
   formData.append("userId", "ssafy");
   formData.append("subject", subjectValue.value);
   formData.append("content", contentValue.value);
   // formData.append("restos", JSON.stringify(resData));
 
   var i = 0;
-  starMap.value.forEach((value, data, index) => {
+  starMap.value.forEach((value, data) => {
     formData.append(`restos[${i}].restoApiId`, data.restoApiId);
     formData.append(`restos[${i}].restoName`, data.restoName);
     formData.append(`restos[${i}].restoPhone`, data.restoPhone);
@@ -593,6 +613,7 @@ const makeMap = () => {
             >
               Search
             </button>
+            <button @click="captureMap">Capture</button>
           </div>
         </div>
       </div>

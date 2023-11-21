@@ -90,11 +90,11 @@ const router = createRouter({
       name: "makemap",
       component: () => import("@/components/Attraction/MakeMap.vue"),
     },
-    {
-      path: "/image/test",
-      name: "imagetest",
-      component: () => import("@/components/Attraction/ImageUploadTest.vue"),
-    },
+    // {
+    //   path: "/image/test",
+    //   name: "imagetest",
+    //   component: () => import("@/components/Attraction/ImageUploadTest.vue"),
+    // },
     {
       path: "/mapresto",
       name: "mapresto",
