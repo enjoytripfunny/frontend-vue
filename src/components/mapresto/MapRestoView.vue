@@ -1,30 +1,40 @@
 <script setup>
-import { useRoute } from 'vue-router';
-import { onMounted, ref } from 'vue'
-import {getMapRestoView} from "@/api/map-resto.js";
+import { useRoute } from "vue-router";
+import { onMounted, ref } from "vue";
+import { getMapRestoView, getUserMapResto } from "@/api/map-resto.js";
 
 const route = useRoute();
-const {mapRestoNo} = route.params;
+const { maprestono } = route.params;
 
-const mapRestoView = ref({});
+const mapRestoView = ref({}); // 맛지도에 대한 설명 저장
+const restoList = ref([]); // 맛지도에 저장된 식당들 저장
 
 onMounted(() => {
   getMapResto();
-})
+  getResto();
+});
 
+// 맛지도에 대한 제목, 작성자, 내용, 작성 날짜
 const getMapResto = () => {
   getMapRestoView(
-    mapRestoNo,
-    ({data}) => {
+    maprestono,
+    ({ data }) => {
       mapRestoView.value = data.mapResto;
       console.log("getMapResto data: ", data);
     },
     (error) => {
       console.error(error);
     }
-  )
-}
+  );
+};
 
+// 맛지도에 저장한 식당들 가져오기
+const getResto = () => {
+  getUserMapResto({ mapRestoNo: maprestono }, (response) => {
+    // restoList.value = data.userRestoList;
+    console.log("getUserMapResto response: ", response);
+  });
+};
 </script>
 
 <template>
@@ -36,15 +46,17 @@ const getMapResto = () => {
         </h2>
       </div>
       <div class="col-lg-6">
-        <img
-          src="@/assets/231120/dc63959c-e527-4d84-b53c-65261d2acf78.jpg"
-          style="width: 600px; height: 600px"
-        />
+        <!-- :src="`/src/assets/${mapRestoView.fileInfo.saveFolder}/${mapRestoView.fileInfo.saveFile}`" -->
+        <div>지도존</div>
       </div>
       <div class="col-lg-6">
         <h3>{{ mapRestoView.subject }}</h3>
-        <div> <span>{{ mapRestoView.userId }}</span></div>
-        <div> <span>{{ mapRestoView.registerTime }}</span></div>
+        <div>
+          <span>{{ mapRestoView.userId }}</span>
+        </div>
+        <div>
+          <span>{{ mapRestoView.registerTime }}</span>
+        </div>
         <p>{{ mapRestoView.content }}</p>
       </div>
     </div>

@@ -128,7 +128,7 @@ const displayMarkers = () => {
         // 내 지도에 추가 버튼 클릭 시 실행되는 함수
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
-          console.log(markers.value[index]);
+          // console.log(markers.value[index]);
           console.log(value);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
 
@@ -527,19 +527,21 @@ const makeMap = () => {
 
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
-  formData.append("userId", "admin");
+  formData.append("userId", "ssafy");
   formData.append("subject", subjectValue.value);
   formData.append("content", contentValue.value);
   // formData.append("restos", JSON.stringify(resData));
 
-  registeredPlace.value.forEach((data, index) => {
-    formData.append(`restos[${index}].restoApiId`, data.restoApiId);
-    formData.append(`restos[${index}].restoName`, data.restoName);
-    formData.append(`restos[${index}].restoPhone`, data.restoPhone);
-    formData.append(`restos[${index}].category`, data.category);
-    formData.append(`restos[${index}].address`, data.address);
-    formData.append(`restos[${index}].latitude`, data.latitude);
-    formData.append(`restos[${index}].longitude`, data.longitude);
+  var i = 0;
+  starMap.value.forEach((value, data, index) => {
+    formData.append(`restos[${i}].restoApiId`, data.restoApiId);
+    formData.append(`restos[${i}].restoName`, data.restoName);
+    formData.append(`restos[${i}].restoPhone`, data.restoPhone);
+    formData.append(`restos[${i}].category`, data.category);
+    formData.append(`restos[${i}].address`, data.address);
+    formData.append(`restos[${i}].latitude`, data.latitude);
+    formData.append(`restos[${i}].longitude`, data.longitude);
+    i++;
     // ... append other RestoDto fields
   });
 

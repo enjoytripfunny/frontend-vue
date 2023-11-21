@@ -32,18 +32,6 @@ const changeLike = () => {
   <li class="marRestoCardItem">
     <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
     <template v-if="mapResto.fileInfo.saveFile == null">
-      <img
-        :src="`/src/assets/231120/ceefd905-1a26-405a-8487-3d91be816778.jpg`"
-        style="width: 230px; height: 230px"
-      />
-    </template>
-    <template v-if="mapResto.fileInfo.saveFile != null">
-      <img
-        :src="`/src/assets/${mapResto.fileInfo.saveFolder}/${mapResto.fileInfo.saveFile}`"
-        style="width: 230px; height: 230px"
-      />
-    </template>
-    <div style="display: flex">
       <router-link
         :to="{
           name: 'mapresto-view',
@@ -51,8 +39,29 @@ const changeLike = () => {
         }"
         class="article-title link-dark"
       >
-        <h6>{{ mapResto.subject }}</h6>
+        <img
+          :src="`/src/assets/231120/ceefd905-1a26-405a-8487-3d91be816778.jpg`"
+          style="width: 230px; height: 230px"
+        />
       </router-link>
+    </template>
+    <template v-if="mapResto.fileInfo.saveFile != null">
+      <router-link
+        :to="{
+          name: 'mapresto-view',
+          params: { maprestono: mapResto.mapRestoNo },
+        }"
+        class="article-title link-dark"
+      >
+        <img
+          :src="`/src/assets/${mapResto.fileInfo.saveFolder}/${mapResto.fileInfo.saveFile}`"
+          style="width: 230px; height: 230px"
+        />
+      </router-link>
+    </template>
+    <div style="display: flex">
+      <h6>{{ mapResto.subject }}</h6>
+
       <img
         v-show="like.value == false"
         src="@/assets/img/beforeLike.png"

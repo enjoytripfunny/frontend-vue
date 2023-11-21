@@ -5,17 +5,20 @@ import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 
 const myMapList = ref([]);
 const likeMapList = ref([]);
+const totalMyMapResto = ref();
+const totalLikeMapResto = ref();
 const myMapPage = ref(0);
 const likeMapPage = ref(0);
 
 const myMapResto = () => {
   listMyMapResto(
     {
-      num: 1,
-      userId: "ssafy",
+      num: myMapPage.value,
+      userId: "admin",
     },
     ({ data }) => {
       myMapList.value = data.myMapList;
+      totalMyMapResto.value = Math.floor(data.totalMyMapResto / 4);
       console.log("listMyMapResto data: ", myMapList.value);
     },
     (error) => console.log("listMyMapResto error: ", error)
@@ -25,11 +28,12 @@ const myMapResto = () => {
 const likeMapResto = () => {
   listLikeMapResto(
     {
-      num: 1,
-      userId: "ssafy",
+      num: likeMapPage.value,
+      userId: "admin",
     },
     ({ data }) => {
       likeMapList.value = data.likeMapList;
+      totalLikeMapResto.value = Math.floor(data.totalLikeMapResto / 4);
       console.log("listLikeMapResto data: ", data);
     },
     (error) => console.log("listLikeMapResto error: ", error)
@@ -41,7 +45,35 @@ onMounted(() => {
   likeMapResto();
 });
 
-const prePage = (num) => {};
+// 내가 작성한 맛지도 - 이전 페이지 버튼
+const prePageMySelect = () => {
+  if (myMapPage.value != 0) {
+    myMapPage.value--;
+    myMapResto();
+  }
+};
+// 내가 작성한 맛지도 - 이후 페이지 버튼
+const nextPageMySelect = () => {
+  if (totalMyMapResto.value != myMapPage.value) {
+    myMapPage.value++;
+    myMapResto();
+  }
+};
+
+// 좋아요 누른 맛지도 - 이전 페이지 버튼
+const prePageLikeSelect = () => {
+  if (likeMapPage.value != 0) {
+    likeMapPage.value--;
+    likeMapResto();
+  }
+};
+// 좋아요 누른 맛지도 - 이후 페이지 버튼
+const nextPageLikeSelect = () => {
+  if (totalLikeMapResto.value != likeMapPage.value) {
+    likeMapPage.value++;
+    likeMapResto();
+  }
+};
 </script>
 
 <template>
@@ -61,9 +93,12 @@ const prePage = (num) => {};
       <div class="col-lg-6">
         <div class="row map-list">
           <h3>나의 지도 리스트</h3>
-
           <ul class="mapRestoCard">
-            <img src="@/assets/img/left.png" class="pre-button" />
+            <img
+              src="@/assets/img/left.png"
+              class="pre-button"
+              @click="prePageMySelect"
+            />
             <!-- <button class="mapPage">pre</button> -->
             <MapRestoCombineListItem
               v-for="mapResto in myMapList"
@@ -72,20 +107,32 @@ const prePage = (num) => {};
             >
             </MapRestoCombineListItem>
             <!-- <button class="mapPage">next</button> -->
-            <img src="@/assets/img/right.png" class="next-button" />
+            <img
+              src="@/assets/img/right.png"
+              class="next-button"
+              @click="nextPageMySelect"
+            />
           </ul>
         </div>
-        <div class="row">
+        <div class="row map-list">
           <h3>좋아요 지도 리스트</h3>
           <ul class="mapRestoCard">
-            <img src="@/assets/img/left.png" class="pre-button" />
+            <img
+              src="@/assets/img/left.png"
+              class="pre-button"
+              @click="prePageLikeSelect"
+            />
             <MapRestoCombineListItem
               v-for="mapResto in likeMapList"
               :key="mapResto.mapRestoNo"
               :mapResto="mapResto"
             >
             </MapRestoCombineListItem>
-            <img src="@/assets/img/right.png" class="next-button" />
+            <img
+              src="@/assets/img/right.png"
+              class="next-button"
+              @click="nextPageLikeSelect"
+            />
           </ul>
         </div>
       </div>
@@ -102,6 +149,8 @@ const prePage = (num) => {};
 
 .map-list {
   background-color: rgb(250, 247, 247);
+  margin: 20px;
+  /* display: flex; */
 }
 
 .pre-button,
