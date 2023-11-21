@@ -4,8 +4,8 @@ import axios from "axios";
 
 const mapRestoProps = defineProps({ mapResto: Object });
 const mapResto = mapRestoProps.mapResto;
-// console.log("mapResto: ", mapResto);
-// console.log("mapResto.mapResto.fileInfo.saveFile",  mapResto.fileInfo.saveFile);
+console.log("mapResto: ", mapResto);
+console.log("mapResto.mapResto.fileInfo.saveFile", mapResto.fileInfo.saveFile);
 // const imgSrc = "@/assets/img/busan.jpg";
 
 const like = ref(false);
@@ -33,22 +33,25 @@ const changeLike = () => {
     <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
     <template v-if="mapResto.fileInfo.saveFile == null">
       <img
-        :src="`/src/assets/231120/31c69de1-2c6c-40ed-9748-e9f637c053c6.jpg`"
+        :src="`/src/assets/231120/ceefd905-1a26-405a-8487-3d91be816778.jpg`"
         style="width: 230px; height: 230px"
       />
     </template>
     <template v-if="mapResto.fileInfo.saveFile != null">
       <img
-        :src="`/src/assets/231120/${mapResto.fileInfo.saveFile}`"
+        :src="`/src/assets/${mapResto.fileInfo.saveFolder}/${mapResto.fileInfo.saveFile}`"
         style="width: 230px; height: 230px"
       />
     </template>
     <div style="display: flex">
       <router-link
-        :to="{ name: 'mapresto-view', params: { maprestono: mapResto.mapRestoNo } }"
+        :to="{
+          name: 'mapresto-view',
+          params: { maprestono: mapResto.mapRestoNo },
+        }"
         class="article-title link-dark"
       >
-      <h6>{{ mapResto.subject }}</h6>
+        <h6>{{ mapResto.subject }}</h6>
       </router-link>
       <img
         v-show="like.value == false"

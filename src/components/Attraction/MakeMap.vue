@@ -8,7 +8,6 @@ import { start } from "@popperjs/core";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
-
 const BASIC_MARKER = "https://i1.daumcdn.net/dmaps/apis/n_local_blit_04.png";
 const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
@@ -112,7 +111,6 @@ const displayMarkers = () => {
         window.addResto = () => {
           console.log(markers.value[index]);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
-
 
           // 이미 추가됐는지 체크
           for (var i = 0; i < registeredPlace.value.length; i++) {
@@ -413,51 +411,18 @@ const axiosInstance = axios.create({
   },
 });
 
-const resData = [
-  {
-    restoApiId: "test",
-    restoName: "test",
-    restoPhone: "test",
-    category: "test",
-    address: "test",
-    latitude: "test",
-    longitude: "test",
-  },
-  {
-    restoApiId: "test",
-    restoName: "test",
-    restoPhone: "test",
-    category: "test",
-    address: "test",
-    latitude: "test",
-    longitude: "test",
-  },
-];
-
-const tagsTest = ["대전", "서울"];
-const subjectValue = ref('');
-const contentValue = ref('');
+const subjectValue = ref("");
+const contentValue = ref("");
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
   console.log("make map !!!");
 
-  for (let index = 0; index < registeredPlace.value.length; index++) {
-    console.log("test: ", registeredPlace.value[index]);
-  }
-  console.log("registeredPlace: ", registeredPlace.value);
-
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
-  // // formData.append("fileInfo", uploadImageFile.value);
-  // // formData.append("content", "test");
-  formData.append("userId", "ssafy");
+  formData.append("userId", "admin");
   formData.append("subject", subjectValue.value);
   formData.append("content", contentValue.value);
-  // formData.append("tags", tagsTest);
-
-  console.log("tags value: ", selectLocation.value[0]);
-  // formData.append("restoInfo", JSON.stringify(resData));
   // formData.append("restos", JSON.stringify(resData));
 
   registeredPlace.value.forEach((data, index) => {
@@ -473,7 +438,7 @@ const makeMap = () => {
 
   selectLocation.value.forEach((data, index) => {
     formData.append(`tags[${index}]`, data);
-  })
+  });
   // formData.append("registerTime", "");
   // formData.append("content", JSON.stringify(restoMap.value));
 

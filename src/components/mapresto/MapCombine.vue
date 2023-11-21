@@ -1,10 +1,12 @@
 <script setup>
 import { listMyMapResto, listLikeMapResto } from "@/api/map-resto.js";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 
 const myMapList = ref([]);
 const likeMapList = ref([]);
+const myMapPage = ref(0);
+const likeMapPage = ref(0);
 
 const myMapResto = () => {
   listMyMapResto(
@@ -12,7 +14,7 @@ const myMapResto = () => {
       num: 1,
       userId: "ssafy",
     },
-    ({data}) => {
+    ({ data }) => {
       myMapList.value = data.myMapList;
       console.log("listMyMapResto data: ", myMapList.value);
     },
@@ -26,7 +28,7 @@ const likeMapResto = () => {
       num: 1,
       userId: "ssafy",
     },
-    ({data}) => {
+    ({ data }) => {
       likeMapList.value = data.likeMapList;
       console.log("listLikeMapResto data: ", data);
     },
@@ -38,6 +40,8 @@ onMounted(() => {
   myMapResto();
   likeMapResto();
 });
+
+const prePage = (num) => {};
 </script>
 
 <template>
@@ -55,23 +59,34 @@ onMounted(() => {
         />
       </div>
       <div class="col-lg-6">
-        <div class="row">
+        <div class="row map-list">
           <h3>나의 지도 리스트</h3>
+
           <ul class="mapRestoCard">
-          <MapRestoCombineListItem 
-          v-for="mapResto in myMapList" 
-          :key="mapResto.mapRestoNo" 
-          :mapResto="mapResto">
-          </MapRestoCombineListItem>
-        </ul>
+            <img src="@/assets/img/left.png" class="pre-button" />
+            <!-- <button class="mapPage">pre</button> -->
+            <MapRestoCombineListItem
+              v-for="mapResto in myMapList"
+              :key="mapResto.mapRestoNo"
+              :mapResto="mapResto"
+            >
+            </MapRestoCombineListItem>
+            <!-- <button class="mapPage">next</button> -->
+            <img src="@/assets/img/right.png" class="next-button" />
+          </ul>
         </div>
         <div class="row">
           <h3>좋아요 지도 리스트</h3>
-          <MapRestoCombineListItem 
-          v-for="mapResto in likeMapList" 
-          :key="mapResto.mapRestoNo" 
-          :mapResto="mapResto">
-          </MapRestoCombineListItem>
+          <ul class="mapRestoCard">
+            <img src="@/assets/img/left.png" class="pre-button" />
+            <MapRestoCombineListItem
+              v-for="mapResto in likeMapList"
+              :key="mapResto.mapRestoNo"
+              :mapResto="mapResto"
+            >
+            </MapRestoCombineListItem>
+            <img src="@/assets/img/right.png" class="next-button" />
+          </ul>
         </div>
       </div>
     </div>
@@ -83,5 +98,15 @@ onMounted(() => {
   list-style-type: none;
   display: flex;
   /* flex-wrap: wrap; */
+}
+
+.map-list {
+  background-color: rgb(250, 247, 247);
+}
+
+.pre-button,
+.next-button {
+  height: 25px;
+  widows: 25px;
 }
 </style>
