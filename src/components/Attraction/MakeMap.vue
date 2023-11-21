@@ -13,6 +13,8 @@ const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
 const CLICK_IMG =
   "https://user-images.githubusercontent.com/70050038/284038352-dfe61846-ac5e-4ccd-9f64-a738a50fbc9e.png";
+const RED_STAR_IMG =
+  "https://user-images.githubusercontent.com/70050038/284425565-a9fbb114-dba8-4b0e-93c9-769de765b914.png";
 
 const router = useRouter();
 
@@ -31,6 +33,11 @@ const registeredPlace = ref([]); // 등록된 장소(마커에서 추가한 장�
 const subject = ref(); // 제목
 const content = ref(); // 글
 const tags = ref([]); // 지역 태그 최대 3개(서울, 대전 ...)
+
+const restos = ref([]);
+
+const starMap = ref(new Map());
+const basicMap = ref(new Map());
 
 const location = ref([
   "서울",
@@ -61,14 +68,18 @@ const displayMarkers = () => {
     });
   }
 
-  // create new markers, and save values at positions
+  // create new markers position, and save values at positions
   const positions = markersData.value.map(
     // based latitude longitude using kakao.maps method
-    (markersData) => new kakao.maps.LatLng(markersData.y, markersData.x)
+    (markersData) =>
+      new kakao.maps.LatLng(markersData.latitude, markersData.longitude)
   );
 
-  // add markers
+  //   const basicMarker;
+
+  // create markers
   if (positions.length > 0) {
+    console.log("positions >> ", positions);
     // make markers by positions
     markers.value = positions.map(
       (position) =>
@@ -82,20 +93,28 @@ const displayMarkers = () => {
         })
     );
 
-    markers.value.forEach((marker, index) => {
-      kakao.maps.event.addListener(marker, "click", () => {
+    basicMap.value.clear();
+
+    for (var i = 0; i < markersData.value.length; i++) {
+      basicMap.value.set(markersData.value[i], markers.value[i]);
+    }
+
+    console.log(basicMap);
+
+    basicMap.value.forEach((value, key) => {
+      kakao.maps.event.addListener(value, "click", () => {
         infowindow.value.close();
         const infowindowContent = `
         <div class"wrap">
           <div id="infowindow" class="info">
               <div class="title">
                   <div class="infowindow-header">
-                      <h3>${markersData.value[index].place_name}</h3>
+                      <h3>${key.restoName}</h3>
                       <div class="closeBtn" onclick="closeOverlay()" title="닫기"></div>
                   </div>
                   <div class="body">
                       <div>
-                          <div class="ellipsis">${markersData.value[index].road_address_name}</div>
+                          <div class="ellipsis">${key.address}</div>
                       </div>
                       <div>
 
@@ -110,33 +129,47 @@ const displayMarkers = () => {
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
           console.log(markers.value[index]);
+          console.log(value);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
 
           // 이미 추가됐는지 체크
-          for (var i = 0; i < registeredPlace.value.length; i++) {
-            if (
-              registeredPlace.value[i].restoApiId ===
-              markersData.value[index].id
-            ) {
+
+          starMap.value.forEach((key, v) => {
+            console.log("!!!", key.restoApiId, value.id);
+            if (key.restoApiId === value.id) {
+              console.log("중복 !!!");
               return;
             }
-          }
-
-          markersData.value[index].registered = true;
-          markers.value[index].setImage(
-            new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35))
-          );
-
-          registeredPlace.value.push({
-            restoApiId: markersData.value[index].id,
-            restoName: markersData.value[index].place_name,
-            restoPhone: markersData.value[index].phone,
-            category: markersData.value[index].category_group_code,
-            address: markersData.value[index].address_name,
-            latitude: markersData.value[index].y,
-            longitude: markersData.value[index].x,
           });
+
+          // starMarkers에 marker 추가
+          const newMarker = new kakao.maps.Marker({
+            map: toRaw(map.value),
+            position: new kakao.maps.LatLng(key.latitude, key.longitude),
+            image: new kakao.maps.MarkerImage(
+              STAR_IMG,
+              new kakao.maps.Size(31, 35)
+            ),
+          });
+
           console.log("register place >> ", registeredPlace.value);
+          infowindow.value.close();
+          addStarMarker(newMarker, {
+            restoApiId: key.restoApiId,
+            restoName: key.restoName,
+            restoPhone: key.restoPhone,
+            category: key.category,
+            address: key.address,
+            latitude: key.latitude,
+            longitude: key.longitude,
+          });
+
+          // basicMarkers에서 marker 제거
+          value.setMap(null);
+          basicMap.value.delete(key);
+
+          console.log("star map >> ", starMap.value);
+          console.log("basic map >> ", basicMap.value);
           infowindow.value.close();
         };
 
@@ -144,15 +177,63 @@ const displayMarkers = () => {
         infowindow.value = new kakao.maps.InfoWindow({
           zIndex: 1,
           content: infowindowContent,
-          position: marker.getPosition(),
+          position: new kakao.maps.LatLng(key.latitude, key.longitude),
           removable: true,
         });
 
-        infowindow.value.open(map.value, marker);
+        infowindow.value.open(map.value, value);
+
+        console.log("basic map ...", basicMap.value);
       });
     });
   }
 };
+
+function addStarMarker(newMarker, newData) {
+  starMap.value.set(newData, newMarker);
+
+  kakao.maps.event.addListener(newMarker, "click", () => {
+    infowindow.value.close();
+    const infowindowContent = `
+        <div class"wrap">
+          <div id="infowindow" class="info">
+              <div class="title">
+                  <div class="infowindow-header">
+                      <h3>${newData.restoName}</h3>
+                      <div class="closeBtn" onclick="closeOverlay()" title="닫기"></div>
+                  </div>
+                  <div class="body">
+                      <div>
+                          <div class="ellipsis">${newData.address}</div>
+                      </div>
+                      <div>
+
+                        <button onclick="addResto()">내 지도에서 제거</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>`;
+    window.addResto = () => {
+      basicMap.value.set(newData, newMarker);
+
+      newMarker.setMap(null);
+      starMap.value.delete(newData);
+
+      console.log(starMap.value);
+    };
+
+    // 클릭 이벤트에 인포윈도우 표시
+    infowindow.value = new kakao.maps.InfoWindow({
+      zIndex: 1,
+      content: infowindowContent,
+      position: new kakao.maps.LatLng(newData.latitude, newData.longitude),
+      removable: true,
+    });
+
+    infowindow.value.open(map.value, newMarker);
+  });
+}
 
 // map init map setting // category : FD6 음식점 CE7 카페
 const initMap = () => {
@@ -179,6 +260,8 @@ const initMap = () => {
   map.value.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
   // end add control
 
+  ps.value = new kakao.maps.services.Places(map.value);
+
   // 각 카테고리에 클릭 이벤트를 등록합니다
   addCategoryClickEvent();
 
@@ -194,22 +277,25 @@ const initMap = () => {
 
   // 카테고리를 클릭했을 때 호출되는 함수입니다
   function onClickCategory() {
+    console.log(this.id);
+    console.log("basic map ", basicMap.value);
+    console.log("star map ", starMap.value);
+    console.log("markers ", markers.value);
+    console.log("markers data ", markersData.value);
     // 카테고리 옵션 'X'
     if (this.id === "") {
       // delete markers
-      if (markers.value.length > 0) {
-        markers.value.forEach((marker) => {
-          //   console.log(marker);
-          marker.setMap(null);
-        });
+      if (basicMap.value.size > 0) {
+        basicMap.value.forEach((key) => key.setMap(null));
       }
+      // basicMarkers에서 marker 제거
+      basicMap.value.clear();
 
       return;
     }
 
     // 카테고리 id FD6, CE7
-    ps.value = new kakao.maps.services.Places(map.value);
-    ps.value.categorySearch(this.id, placesSearchCB, {
+    ps.value.categorySearch(this.id, categorySearch, {
       useMapBounds: true,
     });
   }
@@ -218,14 +304,15 @@ const initMap = () => {
   //   ps.value.categorySearch("FD6", placesSearchCB, { useMapBounds: true });
 
   // 키워드 검색 완료 시 호출되는 콜백함수 입니다
-  function placesSearchCB(data, status) {
-    console.log(data);
+  function categorySearch(data, status) {
+    console.log("category search !! ", data);
 
     // delete markers
     if (markers.value.length > 0) {
       markers.value.forEach((marker) => marker.setMap(null));
     }
 
+    console.log(data);
     // make markers
     markers.value = data.map((data) => {
       return new kakao.maps.Marker({
@@ -236,24 +323,27 @@ const initMap = () => {
 
     markersData.value = data.map((data) => {
       return {
-        address_name: data.address_name,
-        category_group_code: data.category_group_code,
-        category_group_name: data.category_group_name,
-        category_name: data.category_name,
-        distance: data.distance,
-        id: data.id,
-        phone: data.phone,
-        place_name: data.place_name,
-        place_url: data.place_url,
-        road_address_name: data.road_address_name,
-        x: data.x,
-        y: data.y,
+        restoApiId: data.id,
+        restoName: data.place_name,
+        restoPhone: data.phone,
+        category: data.category_group_code,
+        address: data.address_name,
+        latitude: data.y,
+        longitude: data.x,
       };
     });
+
+    for (var i = 0; i < markersData.value.length; i++) {
+      basicMap.value.set(markersData.value[i], markers.value[i]);
+    }
+
+    console.log("basic map category search ", basicMap.value);
 
     if (status === kakao.maps.services.Status.OK) {
       displayMarkers();
     }
+
+    console.log("baisc map after search ", basicMap.value);
   }
 };
 
@@ -279,9 +369,11 @@ const searchPlace = () => {
   // 키워드 검색 완료 시 호출되는 콜백함수 입니다
   function placesSearchCB(data, status) {
     // delete markers
-    if (markers.value.length > 0) {
-      markers.value.forEach((marker) => marker.setMap(null));
+    if (basicMap.value.size > 0) {
+      basicMap.value.forEach((key) => key.setMap(null));
     }
+    // basicMarkers에서 marker 제거
+    basicMap.value.clear();
 
     // make markers
     markers.value = data.map((data) => {
@@ -293,19 +385,13 @@ const searchPlace = () => {
 
     markersData.value = data.map((data) => {
       return {
-        address_name: data.address_name,
-        category_group_code: data.category_group_code,
-        category_group_name: data.category_group_name,
-        category_name: data.category_name,
-        distance: data.distance,
-        id: data.id,
-        phone: data.phone,
-        place_name: data.place_name,
-        place_url: data.place_url,
-        road_address_name: data.road_address_name,
-        x: data.x,
-        y: data.y,
-        registered: false,
+        restoApiId: data.id,
+        restoName: data.place_name,
+        restoPhone: data.phone,
+        category: data.category_group_code,
+        address: data.address_name,
+        latitude: data.y,
+        longitude: data.x,
       };
     });
 
@@ -315,9 +401,12 @@ const searchPlace = () => {
       // LatLngBounds 객체에 좌표를 추가합니다
       var bounds = new kakao.maps.LatLngBounds();
 
-      for (var i = 0; i < markersData.value.length; i++) {
+      for (var i = 0; i < basicMap.value.size; i++) {
         bounds.extend(
-          new kakao.maps.LatLng(markersData.value[i].y, markersData.value[i].x)
+          new kakao.maps.LatLng(
+            markersData.value[i].latitude,
+            markersData.value[i].longitude
+          )
         );
       }
 
@@ -328,26 +417,46 @@ const searchPlace = () => {
 };
 
 // 등록된 장소 지우기
-const deletePlace = (id) => {
+// key : location data
+const deletePlace = (key) => {
+  console.log(key);
   //   별 모양 제거하고 일반 마크로 변경
-  for (var index = 0; index < markersData.value.length; index++) {
-    if (markersData.value[index].id === id) {
-      markers.value[index].setImage(
-        new kakao.maps.MarkerImage(BASIC_MARKER, new kakao.maps.Size(31, 35))
-      );
-    }
-  }
+  //   for (var index = 0; index < markersData.value.length; index++) {
+  //     if (markersData.value[index].id === id) {
+  //       markers.value[index].setImage(
+  //         new kakao.maps.MarkerImage(BASIC_MARKER, new kakao.maps.Size(31, 35))
+  //       );
+  //     }
+  //   }
 
-  for (index = 0; index < starMarkersData.value.length; index++) {
-    if (starMarkersData.value[index].id === id) {
-      starMarkers.value[index].setMap(null);
-    }
-  }
+  //   for (index = 0; index < starMarkersData.value.length; index++) {
+  //     if (starMarkersData.value[index].id === id) {
+  //       starMarkers.value[index].setMap(null);
+  //     }
+  //   }
+
+  // 일반 마커에 추가
+  basicMap.value.set(
+    key,
+    new kakao.maps.Marker({
+      map: toRaw(map.value),
+      position: new kakao.maps.LatLng(key.latitude, key.longitude),
+      image: new kakao.maps.MarkerImage(
+        BASIC_MARKER,
+        new kakao.maps.Size(31, 35)
+      ),
+    })
+  );
+
+  console.log("map kakakak", starMap.value.get(key));
+  // 마커 지우기
+  starMap.value.get(key).setMap(null);
 
   // 등록된 장소 목록에서 요소 제거
-  registeredPlace.value = registeredPlace.value.filter((place) => {
-    return place.id !== id;
-  });
+  starMap.value.delete(key);
+
+  console.log("star map ... ", starMap.value);
+  console.log("basic map ...", basicMap.value);
 };
 
 // 등록된 장소 클릭 : 해당 위치로 이동
@@ -392,13 +501,11 @@ const optionClick = (locate) => {
 const restoMap = ref({
   mapRestoNo: 0, //맛지도 인덱스
   userId: "ssafy", //맛지도 만든 사용자 아이디
-  subject: "", //맛지도 제목
-  content: "", //맛지도 간단 설명
-  // fileInfo: null, //uploadImageFile.value, //맛지도 썸네일
-  // restos: null, //맛지도안에 맛집들의 api 아이디
-  // restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
-  // tags: null, //맛지도에 대한 태그
-  // tags: tags.value, //맛지도에 대한 태그
+  subject: subject.value, //맛지도 제목
+  content: content.value, //맛지도 간단 설명
+  fileInfo: uploadImageFile.value, //맛지도 썸네일
+  restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
+  tags: selectLocation.value, //맛지도에 대한 태그
   registerTime: "", //맛지도 만들어진 날짜
 });
 
@@ -459,22 +566,8 @@ const makeMap = () => {
       router.push({ name: "mapresto-list" });
     })
     .catch((error) => console.log(error));
-  // registMapResto(
-  //   restoMap.value,
-  //   (response) => {
-  //     console.log("registMapResto response의 값: " + response);
-  //   },
-  //   (error) => {
-  //     console.error(error);
-  //   }
-  // );
 };
 </script>
-// const makeMap = () => { // console.log("make map !!!"); // axiosInstance //
-// .post("/mapresto", restoMap.value) // .post("/mapresto/reg", formData.value)
-// // { // // params: restoMap.value, // // // params: postData.value, // // })
-// .then((response) => console.log(response)) // .catch((error) =>
-console.log(error)); // };
 
 <template>
   <div>
@@ -554,20 +647,22 @@ console.log(error)); // };
                       v-model="contentValue"
                     />
                   </div>
+
+                  <!-- star marker list -->
                   <ul>
                     <li
-                      v-for="place in registeredPlace"
-                      :key="place.id"
-                      :value="place.id"
+                      v-for="key in starMap"
+                      :key="key[0].restoApiId"
+                      :value="key[0].restoApiId"
                       class="list-item"
                       @click.prevent="registeredPlaceClick"
                     >
-                      {{ place.place_name }}
+                      {{ key[0].restoName }}
                       <button
                         type="button"
                         class="btn-close"
                         aria-label="Close"
-                        @click.prevent="deletePlace(place.id)"
+                        @click.prevent="deletePlace(key[0])"
                       ></button>
                     </li>
                   </ul>
