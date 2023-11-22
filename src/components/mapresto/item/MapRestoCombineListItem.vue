@@ -4,7 +4,8 @@ import { ref } from "vue";
 const mapResto = defineProps({
   mapResto: Object,
   ischekced: Boolean,
-  apiIds: Object,
+  restoApiIds: Object,
+  starApiIds: Object,
 });
 const emit = defineEmits(["someEvent", "emitArgs"]);
 

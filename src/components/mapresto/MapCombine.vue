@@ -42,8 +42,8 @@ const bounds = ref(); // 마커에 따른 지도 범위 !!
 const basicMap = ref();
 const starMap = ref(new Map());
 
-// 드래그 관련
-const isDragStarted = ref(false);
+// resto 관련
+const restoApiId = ref(new Map());
 
 const myMapResto = () => {
   listMyMapResto(
@@ -236,7 +236,6 @@ onMounted(() => {
   //   isDragStarted.value = true;
   // });
 });
-
 const deletePlace = (resto) => {
   // list : myRestoList, bookmarkRestoList, addRestoList
 
@@ -246,11 +245,9 @@ const deletePlace = (resto) => {
   starMap.value.get(resto.restoApiId)[1].setMap(null);
   starMap.value.delete(resto.restoApiId);
 };
-
 const clicking = () => {
   console.log("clicking !!!", mapRestoNo);
 };
-
 const getRestos = (args) => {
   console.log("수신 >> ", args);
   // api 요청
@@ -259,8 +256,10 @@ const getRestos = (args) => {
     ({ data }) => {
       console.log("listLikeMapResto data: ", data);
 
+      restoApiId.value.length = 0;
       // 마커 가져와서 찍기
       data.userRestoList.forEach((data) => {
+        restoApiId.value.push(data.restoApiId);
         if (args[0] === true) {
           // 추가할 맛집이 이미 존재하면 다음으로
           if (starMap.value.has(data.restoApiId)) return;
@@ -351,10 +350,7 @@ const registeredRestoClick = (a, b) => {
                 :class="{ 'drag-start': isDragStarted }"
                 @some-event="clicking"
                 @emit-args="getRestos"
-                :api-ids="
-                  Array.from(starMap.values()).map((item) => item[0])[0]
-                    .restoName
-                "
+                :api-ids="starMap.values()"
               >
               </MapRestoCombineListItem>
             </ul>
