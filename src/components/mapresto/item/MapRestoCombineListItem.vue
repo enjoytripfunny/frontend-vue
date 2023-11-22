@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 const mapResto = defineProps({
   mapResto: Object,
   ischekced: Boolean,
   restoApiIds: Object,
   starApiIds: Object,
+  count: Object,
 });
 const emit = defineEmits(["someEvent", "emitArgs"]);
 
@@ -17,11 +18,26 @@ const emitArgs = () => {
   emit("emitArgs", [ischekced.value, mapResto.mapResto.mapRestoNo]);
   console.log(ischekced.value);
 };
+
+watch(
+  () => mapResto.count[0],
+  (newValue, oldValue) => {
+    if (newValue < 1) {
+      ischekced.value = !ischekced.value;
+    }
+  }
+);
+// 변경된 값에 따라 원하는 작업을 수행할 수 있습니다.
 </script>
 
 <template>
   <li class="marRestoCardItem">
-    <div :class="{ checkedItem: ischekced, notChecked: !ischekced }">
+    <div
+      :class="{
+        checkedItem: ischekced,
+        notChecked: !ischekced,
+      }"
+    >
       <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
       <img
         :src="`/src/assets/${mapResto.mapResto.fileInfo.saveFolder}/${mapResto.mapResto.fileInfo.saveFile}`"
@@ -33,6 +49,7 @@ const emitArgs = () => {
         <div>{{ mapResto.apiIds }}</div>
       </div>
     </div>
+    <div>{{ count[0] }}</div>
   </li>
 </template>
 
@@ -46,7 +63,7 @@ const emitArgs = () => {
 }
 
 .checkedItem {
-  border: 2px solid #3498db;
+  border: 2px solid rgb(245, 105, 249);
   box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
   /* background-color: #3498db;
   opacity: 0.5; */

@@ -5,12 +5,12 @@ import {
   getMapRestos,
 } from "@/api/map-resto.js";
 import axios from "axios";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref, toRaw, watch } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 
-const props = defineProps({
-  apiId: Array,
-});
+const count = {
+  count: false,
+};
 
 const mapRestoNo = defineEmits({ mapRestoNo: String });
 
@@ -44,6 +44,8 @@ const starMap = ref(new Map());
 
 // resto 관련
 const mapRestoMap = ref(new Map());
+
+// div id
 
 const myMapResto = () => {
   listMyMapResto(
@@ -85,35 +87,17 @@ const displayMarker = (data) => {
       ),
     }),
   ]);
-  console.log("sss", starMap.value.get(data.restoApiId)[1]);
   const marker = starMap.value.get(data.restoApiId)[1];
   kakao.maps.event.addListener(marker, "click", () => {
     infowindow.value.close();
 
     const infowindowContent = `
-        <div class"wrap">
-          <div id="infowindow" class="info">
-              <div class="title">
-                  <div class="infowindow-header">
-                      <h3>${data.restoName}</h3>
-                      <div class="closeBtn" onclick="closeOverlay()" title="닫기"></div>
-                  </div>
-                  <div class="body">
-                      <div>
-                          <div class="ellipsis">${data.address}</div>
-                      </div>
-                      <div>
-
-                        <button onclick="deleteResto()">내 지도에서 삭제</button>
-                      </div>
-                  </div>
-              </div>
-          </div>
-        </div>`;
+        <div style="padding:3px 0px 0px 5px;" onclick="toLink">
+          <a href="https://place.map.kakao.com/${data.restoApiId}" target="_blank">${data.restoName}</a></div>`;
 
     // 내 지도에 추가 버튼 클릭 시 실행되는 함수
     // 함수를 전역에 추가 !!!
-    window.deleteResto = () => {
+    window.toLink = () => {
       console.log("내 지도에 추가 버튼이 클릭되었습니다!");
 
       console.log("?", marker);
@@ -132,7 +116,7 @@ const displayMarker = (data) => {
       position: new kakao.maps.LatLng(data.latitude, data.longitude),
       removable: true,
     });
-
+    infowindow.value.close();
     infowindow.value.open(map.value, marker);
 
     console.log("basic map ...", basicMap.value);
@@ -239,13 +223,31 @@ onMounted(() => {
 const deletePlace = (resto) => {
   // list : myRestoList, bookmarkRestoList, addRestoList
 
-  console.log(resto.value);
+  console.log("delete place", resto.value);
 
   // 마커 제거
   starMap.value.get(resto.restoApiId)[1].setMap(null);
   starMap.value.delete(resto.restoApiId);
 
-  mapRestoMap.forEach((item) => item);
+  mapRestoMap.value.forEach((item) => {
+    // const ids = item[1]
+    for (const id of item[1]) {
+      if (id === resto.restoApiId) {
+        item[0]--;
+        break;
+      }
+    }
+  });
+  console.log(starMap.value.size);
+  if (starMap.value.size === 0) {
+    map.value.setLevel(5);
+    map.value.setCenter(new kakao.maps.LatLng(37.50378611, 127.0248221));
+  } else {
+    infowindow.value.close();
+    setBounds();
+  }
+  console.log(mapRestoMap);
+  console.log(starMap.value);
 };
 const clicking = () => {
   console.log("clicking !!!", mapRestoNo);
@@ -283,6 +285,7 @@ const getRestos = (args) => {
       // 마커에 기반해서 위치 이동
       if (args[0] === true) setBounds();
       console.log("star map", starMap.value);
+      console.log("map location", map.value);
     },
     (error) => console.log("listLikeMapResto error: ", error)
   );
@@ -292,7 +295,6 @@ const getRestos = (args) => {
     Array.from(starMap.value.values()).map((item) => item[0])
   );
 };
-
 const setBounds = () => {
   bounds.value = new kakao.maps.LatLngBounds();
 
@@ -306,11 +308,56 @@ const setBounds = () => {
   // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
   map.value.setBounds(bounds.value);
 };
-
 const registeredRestoClick = (a, b) => {
   console.log("a", a);
   console.log("b", b);
 };
+// 외부 버튼 클릭 시 실행되는 함수 (Vue.js 예시)
+const itemClick = (markerId) => {
+  const marker = starMap.value.get(markerId)[1]; // 마커 가져오기
+  const place = starMap.value.get(markerId)[0];
+
+  infowindow.value = new kakao.maps.InfoWindow({
+    content: `<div style="padding:3px 0px 0px 5px;" onclick="toLink">
+          <a href="https://place.map.kakao.com/${place.restoApiId}" target="_blank">${place.restoName}</a></div>`,
+    removable: true,
+  });
+
+  infowindow.value.close();
+  infowindow.value.open(map.value, marker);
+
+  // 마커 클릭 시 InfoWindow 열기
+  kakao.maps.event.addListener(marker, "click", function () {
+    infowindow.value.close();
+
+    infowindow.value.open(map.value, marker); // 해당 마커의 InfoWindow 열기
+  });
+
+  // 지도 클릭 시 InfoWindow 닫기 (원치 않을 시 생략 가능)
+  kakao.maps.event.addListener(map.value, "click", function () {
+    infowindow.value.close();
+  });
+
+  map.value.setLevel(4);
+  // 해당 마커의 위치로 지도 이동 (원치 않을 시 생략 가능)
+  map.value.setCenter(marker.getPosition());
+
+  console.log(starMap.value);
+};
+const animateButton = function (e) {
+  e.preventDefault;
+  //reset animation
+  e.target.classList.remove("animate");
+
+  e.target.classList.add("animate");
+  setTimeout(function () {
+    e.target.classList.remove("animate");
+  }, 700);
+};
+const classname = document.getElementsByClassName("confetti-button");
+for (var i = 0; i < classname.length; i++) {
+  classname[i].addEventListener("click", animateButton, false);
+}
 </script>
 
 <template>
@@ -341,7 +388,7 @@ const registeredRestoClick = (a, b) => {
 
         <!-- right side -->
         <!-- <div class="row"> -->
-        <div class="col-5" style="height: 75vh; overflow-y: auto">
+        <div id="mapList" class="col-4" style="height: 75vh; overflow-y: auto">
           <!-- 나의 지도 리스트 -->
           <div class="row">
             <h3 class="text-center">나의 지도 리스트</h3>
@@ -352,10 +399,13 @@ const registeredRestoClick = (a, b) => {
                 :value="mapResto.restoApiId"
                 :mapResto="mapResto"
                 draggable="true"
-                :class="{ 'drag-start': isDragStarted }"
                 @some-event="clicking"
                 @emit-args="getRestos"
-                :api-ids="starMap.values()"
+                :count="
+                  mapRestoMap.get(mapResto.mapRestoNo) != null
+                    ? mapRestoMap.get(mapResto.mapRestoNo)
+                    : [0, null]
+                "
               >
               </MapRestoCombineListItem>
             </ul>
@@ -375,28 +425,40 @@ const registeredRestoClick = (a, b) => {
           </div>
         </div>
 
-        <div class="col-2" style="height: 75vh; overflow-y: auto">
-          <div class="text-center">내 지도 맛집</div>
-          <ul>
-            <li
+        <div
+          id="restoList"
+          class="col-2"
+          style="height: 75vh; overflow-y: auto"
+          :style="{
+            border: starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
+          }"
+        >
+          <div class="text-center" style="margin-top: 10px">내 지도 맛집</div>
+          <div>
+            <div
               v-for="resto in Array.from(starMap.values()).map(
                 (item) => item[0]
               )"
               :key="resto.restoApiId"
               :value="resto.restoApiId"
-              class="list-item badge-item"
+              class="list-item badge-item confetti-button"
               style="line-height: 200%; margin: 10px 0"
-              @click.prevent="registeredRestoClick(resto)"
+              @click.prevent="itemClick(resto.restoApiId)"
             >
-              {{ resto.restoName }}
-              <button
-                type="button"
-                class="btn-close"
-                aria-label="close"
-                @click.prevent="deletePlace(resto)"
-              ></button>
-            </li>
-          </ul>
+              <div class="item-container">
+                <div class="" style="padding: 5px">
+                  {{ resto.restoName }}
+                </div>
+
+                <button
+                  type="button"
+                  class="btn-close"
+                  aria-label="close"
+                  @click.prevent="deletePlace(resto)"
+                ></button>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- </div> -->
       </div>
@@ -408,6 +470,28 @@ const registeredRestoClick = (a, b) => {
 #map {
   /* width: 100%; */
   height: 75vh;
+
+  border: 2px solid rgb(124, 124, 255);
+  margin: 0 0.5em;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#mapList {
+  border: 2px solid #000;
+  margin: 0 1em;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#restoList {
+  /* border: 2px solid #ec8dbc; */
+  margin: 0 1em;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 .map_wrap,
 .map_wrap * {
@@ -433,7 +517,7 @@ const registeredRestoClick = (a, b) => {
 }
 
 .badge-item {
-  background-color: rgb(94, 85, 200);
+  background-color: palevioletred;
   color: rgb(255, 255, 255);
   padding: 4px 8px;
   text-align: center;
@@ -461,5 +545,122 @@ a {
 }
 .notHasMarker {
   opacity: 0.7;
+}
+
+.confetti-button {
+  font-family: "Helvetica", "Arial", sans-serif;
+  display: inline-block;
+  font-size: 1em;
+  padding: 5px 5px;
+  margin-top: 100px;
+  margin-bottom: 60px;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #ff0081;
+  color: #fff;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+  box-shadow: 0 2px 25px rgba(255, 0, 130, 0.5);
+}
+
+.confetti-button:focus {
+  outline: 0;
+}
+
+.confetti-button:before,
+.confetti-button:after {
+  position: absolute;
+  content: "";
+  display: block;
+  width: 140%;
+  height: 100%;
+  left: -20%;
+  z-index: -1000;
+  transition: all ease-in-out 0.5s;
+  background-repeat: no-repeat;
+}
+
+.confetti-button:before {
+  display: none;
+  top: -75%;
+  background-image: radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, transparent 20%, #ff0081 20%, transparent 30%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #ff0081 15%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%);
+  background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%,
+    10% 10%, 18% 18%;
+}
+
+.confetti-button:after {
+  display: none;
+  bottom: -75%;
+  background-image: radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #ff0081 15%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%),
+    radial-gradient(circle, #ff0081 20%, transparent 20%);
+  background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+}
+
+.confetti-button:active {
+  transform: scale(0.9);
+  background-color: #e60074;
+  box-shadow: 0 2px 25px rgba(255, 0, 130, 0.2);
+}
+
+.confetti-button.animate:before {
+  display: block;
+  animation: topBubbles ease-in-out 0.75s forwards;
+}
+
+.confetti-button.animate:after {
+  display: block;
+  animation: bottomBubbles ease-in-out 0.75s forwards;
+}
+@keyframes topBubbles {
+  0% {
+    background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%,
+      40% 90%, 55% 90%, 70% 90%;
+  }
+  50% {
+    background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%,
+      50% 50%, 65% 20%, 90% 30%;
+  }
+  100% {
+    background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%,
+      50% 40%, 65% 10%, 90% 20%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+}
+@keyframes bottomBubbles {
+  0% {
+    background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%,
+      70% -10%, 70% 0%;
+  }
+  50% {
+    background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%,
+      105% 0%;
+  }
+  100% {
+    background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%,
+      110% 10%;
+    background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+}
+
+.item-container {
+  display: flex;
+  justify-content: space-between; /* 요소를 양쪽 끝으로 정렬합니다 */
 }
 </style>
