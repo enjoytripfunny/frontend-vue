@@ -16,12 +16,20 @@ const maxPage = ref(1);
 // const calMaxPage = computed(() => {
 //   maxPage.value = Math.ceil(totalMapResto.value / 12);
 // })
-watch(totalMapResto, (newData, oldData) => {
-  maxPage.value = Math.ceil(totalMapResto.value / 12);
-  console.log("maxPage.value: " + maxPage.value);
-});
+// watch(totalMapResto, (newData, oldData) => {
+//   maxPage.value = Math.ceil(totalMapResto.value / 12);
+//   console.log("maxPage.value: " + maxPage.value);
+// });
 
 const mapRestoList = ref([]);
+const mapRestoParam = ref({
+  num: 0,
+  total: 12,
+  userId: "ssafy",
+  // num: listCount.value,
+  // total: totalMapResto.value,
+  // userId: "ssafy",
+});
 
 onMounted(() => {
   getMapRestoList();
@@ -29,10 +37,12 @@ onMounted(() => {
 
 const getMapRestoList = () => {
   listMapResto(
-    { num: listCount.value, total: totalMapResto.value },
+    mapRestoParam.value,
     ({ data }) => {
       mapRestoList.value = data.list;
-      totalMapResto.value = data.total;
+      // totalMapResto.value = data.total;
+      mapRestoParam.value.total = data.total;
+      maxPage.value = Math.ceil(mapRestoParam.value.total / 12);
       console.log("getMapRestoList list: ", data.list);
       console.log("getMapRestoList total: ", data.total);
     },

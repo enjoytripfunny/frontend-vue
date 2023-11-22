@@ -1,16 +1,20 @@
 <script setup>
-import { onMounted, ref /*watch*/ } from "vue";
+import { onMounted, onUpdated, ref /*watch*/, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useMenuStore } from "@/stores/menu";
+import { useMemberStore } from "@/stores/member";
 import { storeToRefs } from "pinia";
 
 const menuStore = useMenuStore();
+const memberStore = useMemberStore();
 // 반응형을 유지하면서 스토어에서 속성을 추출하려면, storeToRefs()를 사용
 // https://pinia.vuejs.kr/core-concepts/
 const { menuList } = storeToRefs(menuStore);
+const { userInfo } = storeToRefs(memberStore);
+const { getUserName } = memberStore;
 const { changeMenuState } = menuStore;
 
-const userName = ref("");
+const userName = ref(userInfo.value.userName);
 
 onMounted(() => {
   /*if (localStorage.getItem("userInfo")) {
@@ -20,7 +24,22 @@ onMounted(() => {
   } else {
     loginCheck.value = false;
   }*/
+  console.log("첫 시작 네비게이션 바:", userInfo.value);
+  console.log("첫 시작 userName: ", getUserName);
 });
+
+// watch(userInfo.value.userName, (newValue, oldValue) => {
+//   console.log("변경 watch 값: ", newValue);
+//   userName.value = newValue.userName;
+// });
+
+watch(
+  () => userInfo.value,
+  (data) => {
+    userName.value = data.userName;
+  },
+  { immediate: true, deep: true }
+);
 
 // watch(userName, () => {
 //   window.location.reload();
@@ -72,14 +91,14 @@ const logout = () => {
               >맛지도 보기</router-link
             >
           </li>
-          <li class="nav-item nav-item-margin">
+          <!-- <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-register' }"
               class="nav-link"
               href="#"
               >맛지도 등록</router-link
             >
-          </li>
+          </li> -->
           <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-combine' }"

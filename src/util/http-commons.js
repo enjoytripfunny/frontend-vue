@@ -9,6 +9,11 @@ function localAxios() {
       "Content-Type": "application/json;charset=utf-8",
     },
   });
+
+  // Request 발생 시 적용할 내용.
+  // instance.defaults.headers.common["Authorization"] = "";
+  // instance.defaults.headers.post["Content-Type"] = "application/json";
+  // instance.defaults.headers.put["Content-Type"] = "application/json";
   return instance;
 }
 

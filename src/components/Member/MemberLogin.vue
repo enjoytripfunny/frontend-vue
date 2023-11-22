@@ -39,11 +39,14 @@ const jwtLogin = async () => {
   console.log("token >> ", token);
   console.log("is login ? ", isLogin.value);
 
-  if (isLogin) {
+  if (isLogin.value) {
     getUserInfo(token);
     changeMenuState();
+    router.push("/");
+  } else {
+    alert("아이디 또는 비밀번호가 맞지않습니다.");
+    // console.log("로그인 실패. 로그인 해줘세요");
   }
-  router.push("/");
 };
 
 // 일반
