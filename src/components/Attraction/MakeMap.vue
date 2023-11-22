@@ -466,6 +466,7 @@ const registeredPlaceClick = () => {
 };
 
 const uploadImageFile = ref(); // image source
+const webMapRestImg = ref();
 // 이미지 웹에 띄우기
 const onFileSelected = (event) => {
   const input = event.target;
@@ -474,6 +475,7 @@ const onFileSelected = (event) => {
     reader.onload = (e) => {
       uploadImageFile.value = input; // image source 매우 긴 영어
       // uploadImageFile.value = e.target.result; // image source 매우 긴 영어
+      webMapRestImg.value = e.target.result;
     };
     reader.readAsDataURL(input.files[0]);
   }
@@ -521,6 +523,18 @@ const axiosInstance = axios.create({
 
 const subjectValue = ref("");
 const contentValue = ref("");
+
+const captureMap = () => {
+  var staticMapContainer = document.getElementById("mapTest"), // 이미지 지도를 표시할 div
+    staticMapOption = {
+      center: new kakao.maps.LatLng(33.450701, 126.570667), // 이미지 지도의 중심좌표
+      level: 3, // 이미지 지도의 확대 레벨
+    };
+
+  // 이미지 지도를 표시할 div와 옵션으로 이미지 지도를 생성합니다
+  var staticMap = new kakao.maps.StaticMap(staticMapContainer, staticMapOption);
+  console.log("이미지 생성 값: ", staticMap);
+};
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = async () => {
@@ -625,6 +639,7 @@ const makeMap = async () => {
       <div class="col-8">
         <div class="map_wrap">
           <div id="map" style="position: relative; overflow: hidden"></div>
+
           <ul id="category" style="margin-left: 20px">
             <li id="FD6" data-order="0" class="restaurant">음식점</li>
             <li id="CE7" data-order="0" class="cafe">카페</li>
@@ -634,6 +649,7 @@ const makeMap = async () => {
       </div>
       <div class="container mt-3 col-4">
         <div class="row justify-content-center">
+          <!-- <div class="mapTest"></div> -->
           <div class="col-md-11">
             <div class="card" style="height: 600px; overflow-y: auto">
               <div class="card-header">
@@ -641,11 +657,8 @@ const makeMap = async () => {
               </div>
               <div class="card-body">
                 <div class="thumbnail-container">
-                  <img
-                    class="thumbnail"
-                    :src="uploadImageFile"
-                    alt="사진 없음"
-                  />
+                  <img class="thumbnail" :src="webMapRestImg" alt="사진 없음" />
+                  <!-- :src="uploadImageFile" -->
                   <!-- <div>썸네일 사진</div> -->
                 </div>
                 <div>
