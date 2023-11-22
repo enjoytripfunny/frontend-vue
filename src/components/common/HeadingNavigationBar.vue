@@ -1,16 +1,21 @@
 <script setup>
-import { onMounted, ref /*watch*/ } from "vue";
+import { onMounted,  ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useMenuStore } from "@/stores/menu";
+import { useMemberStore } from "@/stores/member";
 import { storeToRefs } from "pinia";
+import { useRouter } from 'vue-router';
 
 const menuStore = useMenuStore();
+const memberStore = useMemberStore();
+const router = useRouter();
 // 반응형을 유지하면서 스토어에서 속성을 추출하려면, storeToRefs()를 사용
 // https://pinia.vuejs.kr/core-concepts/
 const { menuList } = storeToRefs(menuStore);
+const { getUserName, getUserId  } = storeToRefs(memberStore);
+const { userLogout } = memberStore;
+// const { getUserName } = memberStore;
 const { changeMenuState } = menuStore;
-
-const userName = ref("");
 
 onMounted(() => {
   /*if (localStorage.getItem("userInfo")) {
@@ -22,6 +27,19 @@ onMounted(() => {
   }*/
 });
 
+// watch(userInfo.value.userName, (newValue, oldValue) => {
+//   console.log("변경 watch 값: ", newValue);
+//   userName.value = newValue.userName;
+// });
+
+// watch(
+//   () => userInfo.value,
+//   (data) => {
+//     userName.value = data.userName;
+//   },
+//   { immediate: true, deep: true }
+// );
+
 // watch(userName, () => {
 //   window.location.reload();
 // });
@@ -30,7 +48,10 @@ const logout = () => {
   console.log("로그아웃!!!!");
   localStorage.clear();
   sessionStorage.clear();
+  console.log("로그아웃하는 아이디: ", getUserId.value);
   changeMenuState();
+  userLogout(getUserId.value);
+  router.push({name: "home"});
 };
 </script>
 
@@ -72,14 +93,14 @@ const logout = () => {
               >맛지도 보기</router-link
             >
           </li>
-          <li class="nav-item nav-item-margin">
+          <!-- <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-register' }"
               class="nav-link"
               href="#"
               >맛지도 등록</router-link
             >
-          </li>
+          </li> -->
           <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-combine' }"
@@ -137,7 +158,8 @@ const logout = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            {{ userName }}님
+            <!-- {{ memberStore.getUserName }}님 -->
+            {{ getUserName }}님
           </a>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <li>

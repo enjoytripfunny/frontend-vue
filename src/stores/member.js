@@ -5,14 +5,31 @@ import { jwtDecode } from "jwt-decode";
 
 import { userConfirm, findById, tokenRegeneration, logout } from "@/api/user";
 import { httpStatusCode } from "@/util/http-status";
+// import { computed } from "@vue/reactivity";
+import { computed } from "vue";
 
 export const useMemberStore = defineStore("memberStore", () => {
   const router = useRouter();
 
   const isLogin = ref(false);
   const isLoginError = ref(false);
-  const userInfo = ref(null);
+  const userInfo = ref({});
   const isValidToken = ref(false);
+
+  const getUserName = computed(() => userInfo.value.userName);
+  const getUserId = computed(() => {
+    if (userInfo.value == null) {
+      return "";
+    } else {
+      return userInfo.value.userId;
+    }
+  });
+  // const getUserId = computed(() => userInfo.value.userId);
+
+  // = computed(() => {
+  //   console.log("memberStore - getUerName : " + userInfo.value);
+  //   return userInfo.value.userName;
+  // });
 
   // loginUser : id, password
   const userLogin = async (loginUser) => {
@@ -35,6 +52,9 @@ export const useMemberStore = defineStore("memberStore", () => {
         }
       },
       (error) => {
+        isLogin.value = false;
+        isLoginError.value = true;
+        isValidToken.value = false;
         console.error(error);
       }
     );
@@ -126,6 +146,8 @@ export const useMemberStore = defineStore("memberStore", () => {
     isLoginError,
     userInfo,
     isValidToken,
+    getUserName,
+    getUserId,
     userLogin,
     getUserInfo,
     tokenRegenerate,

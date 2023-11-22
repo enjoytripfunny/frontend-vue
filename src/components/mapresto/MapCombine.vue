@@ -4,17 +4,19 @@ import {
   listLikeMapResto,
   getMapRestos,
 } from "@/api/map-resto.js";
-import axios from "axios";
 import { onMounted, ref, toRaw, watch } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 import { useRouter } from 'vue-router';
+import { useMemberStore } from '@/stores/member';
 
-const router = useRouter();
 const count = {
   count: false,
 };
 
 const mapRestoNo = defineEmits({ mapRestoNo: String });
+
+const router = useRouter();
+const memberStore = useMemberStore();
 
 const myMapList = ref([]);
 const likeMapList = ref([]);
@@ -57,7 +59,7 @@ const myMapResto = () => {
   listMyMapResto(
     {
       num: myMapPage.value,
-      userId: "ssafy",
+      userId: memberStore.getUserId,
     },
     ({ data }) => {
       myMapList.value = data.myMapList;
@@ -72,7 +74,7 @@ const likeMapResto = () => {
   listLikeMapResto(
     {
       num: likeMapPage.value,
-      userId: "ssafy",
+      userId: memberStore.getUserId,
     },
     ({ data }) => {
       likeMapList.value = data.likeMapList;
@@ -259,47 +261,6 @@ const nextPageLikeSelect = () => {
   }
 };
 
-// 지도 캡처
-const captureMap = async () => {
-  const captureArea = document.getElementById("captureMapArea");
-  const canvas = await html2canvas(captureArea);
-  const imgBase64 = canvas.toDataURL();
-  // const imgBase64 = canvas.toDataURL('image/jpeg', 'image/octet-stream');
-  const decodImg = atob(imgBase64.split(',')[1]);
-
-  let array = [];
-  for (let i = 0; i < decodImg .length; i++) {
-    array.push(decodImg .charCodeAt(i));
-  }
-
-  const file = new Blob([new Uint8Array(array)], {type: 'image/png'});
-  const fileName = 'capture_img_' + new Date().getMilliseconds() + '.png';
-  let formData = new FormData();
-  formData.append('file', file, fileName);
-  formData.append("userId", "ssafy");
-  formData.append("subject", "화면 캡처 테스트");
-  formData.append("content", "화면 캡처 테스트");
-  formData.append("tags", ["대전", "서울"]);
-
-  axios
-    .post("http://localhost:9090/mapresto/reg", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        // "Content-Type": "application/json;charset=utf-8",
-      },
-    })
-    // {
-    //   params: restoMap.value,
-    //   // params: postData.value,
-    // })
-    .then((response) => {
-      console.log(response);
-      router.push({ name: "mapresto-list" });
-    })
-    .catch((error) => console.log(error));
-
-
-}
 const deletePlace = (resto) => {
   // list : myRestoList, bookmarkRestoList, addRestoList
 

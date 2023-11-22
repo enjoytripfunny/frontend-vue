@@ -3,8 +3,13 @@ import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import MapRestoListItem from "./item/MapRestoListItem.vue";
 import { listMapResto } from "@/api/map-resto.js";
+import { useMemberStore } from '@/stores/member';
+import { storeToRefs } from "pinia";
 
+const memberStore = useMemberStore();
 const router = useRouter();
+
+const { getUserId } = storeToRefs(memberStore);
 
 const moveRegMapResto = () => {
   router.push({ name: "makemap" });
@@ -16,28 +21,39 @@ const maxPage = ref(1);
 // const calMaxPage = computed(() => {
 //   maxPage.value = Math.ceil(totalMapResto.value / 12);
 // })
-watch(totalMapResto, (newData, oldData) => {
-  maxPage.value = Math.ceil(totalMapResto.value / 12);
-  console.log("maxPage.value: " + maxPage.value);
-});
+// watch(totalMapResto, (newData, oldData) => {
+//   maxPage.value = Math.ceil(totalMapResto.value / 12);
+//   console.log("maxPage.value: " + maxPage.value);
+// });
 
 const mapRestoList = ref([]);
+const mapRestoParam = ref({
+  num: 0,
+  total: 12,
+  userId: memberStore.getUserId,
+  // num: listCount.value,
+  // total: totalMapResto.value,
+  // userId: "ssafy",
+});
 
 onMounted(() => {
   getMapRestoList();
 });
 
 const getMapRestoList = () => {
+  console.log("getUserId : ", getUserId.value);
+  console.log("getMapRestoList userId: ", memberStore.getUserId);
   listMapResto(
-    { num: listCount.value, total: totalMapResto.value },
+    mapRestoParam.value,
     ({ data }) => {
       mapRestoList.value = data.list;
-      totalMapResto.value = data.total;
-      console.log("getMapRestoList list: ", data.list);
-      console.log("getMapRestoList total: ", data.total);
+      // totalMapResto.value = data.total;
+      mapRestoParam.value.total = data.total;
+      maxPage.value = Math.ceil(mapRestoParam.value.total / 12);
     },
     (error) => console.log("getMapRestoList error: ", error)
   );
+  console.log("목록 보기");
 };
 
 const addList = () => {
