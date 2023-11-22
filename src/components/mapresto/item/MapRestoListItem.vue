@@ -67,15 +67,18 @@ const changeLike = () => {
       <div style="display: flex">
       <h6>{{ mapResto.subject }}</h6>
 
+      <router-link
+        :to="{
+          name: 'mapresto-view',
+          params: { maprestono: mapResto.mapRestoNo },
+        }"
+        class="article-title link-dark"
+      >
+        <h6>{{ mapResto.subject }}</h6>
+      </router-link>
       <img
         v-show="like == -1"
         src="@/assets/img/beforeLike.png"
-        style="width: 20px; height: 20px; margin-left: auto"
-        @click="changeLike"
-      />
-      <img
-        v-show="like == 1"
-        src="@/assets/img/afterLike.png"
         style="width: 20px; height: 20px; margin-left: auto"
         @click="changeLike"
       />

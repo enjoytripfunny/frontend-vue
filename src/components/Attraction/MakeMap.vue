@@ -3,7 +3,6 @@ import { onMounted, ref, toRaw } from "vue";
 
 import { useRouter } from "vue-router";
 import axios from "axios";
-import html2canvas from "html2canvas";
 import { registMapResto } from "../../api/map-resto";
 import { start } from "@popperjs/core";
 
@@ -520,45 +519,12 @@ const axiosInstance = axios.create({
     "Content-Type": "multipart/form-data", // Content-Type을 반드시 이렇게 하여야 한다.
   },
 });
-
-const subjectValue = ref("");
-const contentValue = ref("");
-
-const captureMap = () => {
-  var staticMapContainer = document.getElementById("mapTest"), // 이미지 지도를 표시할 div
-    staticMapOption = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667), // 이미지 지도의 중심좌표
-      level: 3, // 이미지 지도의 확대 레벨
-    };
-
-  // 이미지 지도를 표시할 div와 옵션으로 이미지 지도를 생성합니다
-  var staticMap = new kakao.maps.StaticMap(staticMapContainer, staticMapOption);
-  console.log("이미지 생성 값: ", staticMap);
-};
+const subjectValue = ref('');
+const contentValue = ref('');
 
 // 만들기 버튼 클릭 이벤트
-const makeMap = async () => {
+const makeMap = () => {
   console.log("make map !!!");
-  // ----------------------------------
-
-  const captureArea = document.getElementById("map");
-  const canvas = await html2canvas(captureArea, {
-    proxy: "http://localhost:9090/html2canvas/proxy.json",
-  });
-  const imgBase64 = canvas.toDataURL();
-  // const imgBase64 = canvas.toDataURL('image/jpeg', 'image/octet-stream');
-  const decodImg = atob(imgBase64.split(",")[1]);
-
-  let array = [];
-  for (let i = 0; i < decodImg.length; i++) {
-    array.push(decodImg.charCodeAt(i));
-  }
-
-  const file = new Blob([new Uint8Array(array)], { type: "image/png" });
-  const fileName = "capture_img_" + new Date().getMilliseconds() + ".png";
-  // formData.append("file", file, fileName);
-
-  // ----------------------------------
 
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
@@ -629,7 +595,6 @@ const makeMap = async () => {
             >
               Search
             </button>
-            <!-- <button @click="captureMap">Capture</button> -->
           </div>
         </div>
       </div>
@@ -639,7 +604,6 @@ const makeMap = async () => {
       <div class="col-8">
         <div class="map_wrap">
           <div id="map" style="position: relative; overflow: hidden"></div>
-
           <ul id="category" style="margin-left: 20px">
             <li id="FD6" data-order="0" class="restaurant">음식점</li>
             <li id="CE7" data-order="0" class="cafe">카페</li>
@@ -649,7 +613,6 @@ const makeMap = async () => {
       </div>
       <div class="container mt-3 col-4">
         <div class="row justify-content-center">
-          <!-- <div class="mapTest"></div> -->
           <div class="col-md-11">
             <div class="card" style="height: 600px; overflow-y: auto">
               <div class="card-header">
@@ -658,8 +621,6 @@ const makeMap = async () => {
               <div class="card-body">
                 <div class="thumbnail-container">
                   <img class="thumbnail" :src="webMapRestImg" alt="사진 없음" />
-                  <!-- :src="uploadImageFile" -->
-                  <!-- <div>썸네일 사진</div> -->
                 </div>
                 <div>
                   <input type="file" @change="onFileSelected" />

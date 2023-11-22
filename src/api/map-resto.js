@@ -34,10 +34,17 @@ function getMapRestoView(maprestono, success, fail) {
   local.get(`/mapresto/view/${maprestono}`).then(success).catch(fail);
 }
 
-// 맛지도에 저장한 식당들 가져오기
-function getUserMapResto(param, success, fail) {
-  local.get(`/mapresto/userResto`, { params: param }).then(success).catch(fail);
+function getMapRestos(args, success, fail) {
+  local
+      .get(`/mapresto/userResto`, { params: { mapRestoNo: args } })
+      .then(success)
+      .catch(fail);
 }
+
+// 맛지도에 저장한 식당들 가져오기
+// function getUserMapResto(param, success, fail) {
+//   local.get(`/mapresto/userResto`, { params: param }).then(success).catch(fail);
+// }
 
 // 화면 캡처 테스트용
 // function captureImg(mapresto, success, fail) {
@@ -52,6 +59,7 @@ export {
   listMyMapResto,
   listLikeMapResto,
   getMapRestoView,
-  getUserMapResto,
+  // getUserMapResto,
   // captureImg
+  getMapRestos
 };
