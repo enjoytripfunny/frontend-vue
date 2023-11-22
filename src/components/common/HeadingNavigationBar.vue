@@ -1,20 +1,21 @@
 <script setup>
-import { onMounted, onUpdated, ref /*watch*/, watch } from "vue";
+import { onMounted,  ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useMenuStore } from "@/stores/menu";
 import { useMemberStore } from "@/stores/member";
 import { storeToRefs } from "pinia";
+import { useRouter } from 'vue-router';
 
 const menuStore = useMenuStore();
 const memberStore = useMemberStore();
+const router = useRouter();
 // 반응형을 유지하면서 스토어에서 속성을 추출하려면, storeToRefs()를 사용
 // https://pinia.vuejs.kr/core-concepts/
 const { menuList } = storeToRefs(menuStore);
-const { userInfo } = storeToRefs(memberStore);
-const { getUserName } = memberStore;
+const { getUserName, getUserId  } = storeToRefs(memberStore);
+const { userLogout } = memberStore;
+// const { getUserName } = memberStore;
 const { changeMenuState } = menuStore;
-
-const userName = ref(userInfo.value.userName);
 
 onMounted(() => {
   /*if (localStorage.getItem("userInfo")) {
@@ -24,8 +25,6 @@ onMounted(() => {
   } else {
     loginCheck.value = false;
   }*/
-  console.log("첫 시작 네비게이션 바:", userInfo.value);
-  console.log("첫 시작 userName: ", getUserName);
 });
 
 // watch(userInfo.value.userName, (newValue, oldValue) => {
@@ -33,13 +32,13 @@ onMounted(() => {
 //   userName.value = newValue.userName;
 // });
 
-watch(
-  () => userInfo.value,
-  (data) => {
-    userName.value = data.userName;
-  },
-  { immediate: true, deep: true }
-);
+// watch(
+//   () => userInfo.value,
+//   (data) => {
+//     userName.value = data.userName;
+//   },
+//   { immediate: true, deep: true }
+// );
 
 // watch(userName, () => {
 //   window.location.reload();
@@ -49,7 +48,10 @@ const logout = () => {
   console.log("로그아웃!!!!");
   localStorage.clear();
   sessionStorage.clear();
+  console.log("로그아웃하는 아이디: ", getUserId.value);
   changeMenuState();
+  userLogout(getUserId.value);
+  router.push({name: "home"});
 };
 </script>
 
@@ -156,7 +158,8 @@ const logout = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            {{ userName }}님
+            <!-- {{ memberStore.getUserName }}님 -->
+            {{ getUserName }}님
           </a>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <li>

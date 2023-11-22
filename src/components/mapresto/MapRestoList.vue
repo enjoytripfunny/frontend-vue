@@ -3,8 +3,13 @@ import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import MapRestoListItem from "./item/MapRestoListItem.vue";
 import { listMapResto } from "@/api/map-resto.js";
+import { useMemberStore } from '@/stores/member';
+import { storeToRefs } from "pinia";
 
+const memberStore = useMemberStore();
 const router = useRouter();
+
+const { getUserId } = storeToRefs(memberStore);
 
 const moveRegMapResto = () => {
   router.push({ name: "makemap" });
@@ -25,7 +30,7 @@ const mapRestoList = ref([]);
 const mapRestoParam = ref({
   num: 0,
   total: 12,
-  userId: "ssafy",
+  userId: memberStore.getUserId,
   // num: listCount.value,
   // total: totalMapResto.value,
   // userId: "ssafy",
@@ -36,6 +41,8 @@ onMounted(() => {
 });
 
 const getMapRestoList = () => {
+  console.log("getUserId : ", getUserId.value);
+  console.log("getMapRestoList userId: ", memberStore.getUserId);
   listMapResto(
     mapRestoParam.value,
     ({ data }) => {
@@ -43,11 +50,10 @@ const getMapRestoList = () => {
       // totalMapResto.value = data.total;
       mapRestoParam.value.total = data.total;
       maxPage.value = Math.ceil(mapRestoParam.value.total / 12);
-      console.log("getMapRestoList list: ", data.list);
-      console.log("getMapRestoList total: ", data.total);
     },
     (error) => console.log("getMapRestoList error: ", error)
   );
+  console.log("목록 보기");
 };
 
 const addList = () => {

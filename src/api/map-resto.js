@@ -5,7 +5,7 @@ const form = formAxios();
 
 // 맛지도 게시물 목록 가져오기
 function listMapResto(mapRestoParam, success, fail) {
-  local.get(`/mapresto`, mapRestoParam).then(success).catch(fail);
+  local.post(`/mapresto/list`,mapRestoParam).then(success).catch(fail);
 }
 
 // 좋아요 값 변경

@@ -1,26 +1,22 @@
 <script setup>
-import { ref, watch } from "vue";
-import axios from "axios";
+import { ref } from "vue";
 import { registerLike } from '@/api/map-resto';
+import { useMemberStore } from '@/stores/member';
 
 const mapRestoProps = defineProps({ mapResto: Object });
 const mapResto = mapRestoProps.mapResto;
+const memberStore = useMemberStore();
 const like = ref();
 like.value = mapResto.likeValue == 1 ? 1 : -1;
-console.log("변경 전 like: ", like.value);
-console.log("mapResto: ", mapResto);
-// const imgSrc = "@/assets/img/busan.jpg";
 
-// const like = ref(false);
 const likeInfo = ref({
-  userId: "ssafy",
+  userId: memberStore.getUserId,
   likeValue: "",
   mapRestoNo: mapResto.mapRestoNo,
 });
 
 const changeLike = () => {
     like.value = like.value == 1 ? -1 : 1;
-    console.log("변경된 like: ", like.value);
     likeInfo.value.likeValue = like.value;
   registerLike(
     likeInfo.value,

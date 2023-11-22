@@ -4,9 +4,11 @@ import { onMounted, ref, watch } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 import html2canvas from 'html2canvas';
 import axios from 'axios';
+import { useMemberStore } from '@/stores/member';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const memberStore = useMemberStore();
 const myMapList = ref([]);
 const likeMapList = ref([]);
 const totalMyMapResto = ref();
@@ -18,7 +20,7 @@ const myMapResto = () => {
   listMyMapResto(
     {
       num: myMapPage.value,
-      userId: "admin",
+      userId: memberStore.getUserId,
     },
     ({ data }) => {
       myMapList.value = data.myMapList;
@@ -33,7 +35,7 @@ const likeMapResto = () => {
   listLikeMapResto(
     {
       num: likeMapPage.value,
-      userId: "admin",
+      userId: memberStore.getUserId,
     },
     ({ data }) => {
       likeMapList.value = data.likeMapList;
