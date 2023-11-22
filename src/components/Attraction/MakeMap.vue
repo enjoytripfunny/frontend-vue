@@ -3,7 +3,7 @@ import { onMounted, ref, toRaw } from "vue";
 
 import { useRouter } from "vue-router";
 import axios from "axios";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { registMapResto } from "../../api/map-resto";
 import { start } from "@popperjs/core";
 
@@ -528,25 +528,27 @@ const makeMap = async () => {
   // ----------------------------------
 
   const captureArea = document.getElementById("map");
-  const canvas = await html2canvas(captureArea);
+  const canvas = await html2canvas(captureArea, {
+    proxy: "http://localhost:9090/html2canvas/proxy.json",
+  });
   const imgBase64 = canvas.toDataURL();
   // const imgBase64 = canvas.toDataURL('image/jpeg', 'image/octet-stream');
-  const decodImg = atob(imgBase64.split(',')[1]);
+  const decodImg = atob(imgBase64.split(",")[1]);
 
   let array = [];
-  for (let i = 0; i < decodImg .length; i++) {
-    array.push(decodImg .charCodeAt(i));
+  for (let i = 0; i < decodImg.length; i++) {
+    array.push(decodImg.charCodeAt(i));
   }
 
-  const file = new Blob([new Uint8Array(array)], {type: 'image/png'});
-  const fileName = 'capture_img_' + new Date().getMilliseconds() + '.png';
-  
+  const file = new Blob([new Uint8Array(array)], { type: "image/png" });
+  const fileName = "capture_img_" + new Date().getMilliseconds() + ".png";
+  // formData.append("file", file, fileName);
+
   // ----------------------------------
-  
+
   const formData = new FormData();
-  // formData.append("file", uploadImageFile.value.files[0]);
-  
-  formData.append('file', file, fileName);
+  formData.append("file", uploadImageFile.value.files[0]);
+
   formData.append("userId", "ssafy");
   formData.append("subject", subjectValue.value);
   formData.append("content", contentValue.value);
@@ -613,7 +615,7 @@ const makeMap = async () => {
             >
               Search
             </button>
-            <button @click="captureMap">Capture</button>
+            <!-- <button @click="captureMap">Capture</button> -->
           </div>
         </div>
       </div>
