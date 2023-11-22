@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 import App from "./App.vue";
 import router from "./router";
@@ -10,7 +11,10 @@ import "bootstrap";
 
 const app = createApp(App);
 
-app.use(createPinia());
+//pinia-plugin-persistedstate 사용을 위함
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+app.use(pinia);
 app.use(router);
 
 app.mount("#app");

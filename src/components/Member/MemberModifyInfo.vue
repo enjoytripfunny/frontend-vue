@@ -3,16 +3,26 @@ import { ref } from "vue";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import router from "@/router";
-import {RouterLink} from "vue-router";
+import { RouterLink } from "vue-router";
+import { useMemberStore } from "@/stores/member";
+import { storeToRefs } from "pinia";
 
-const userInfo = ref(JSON.parse(localStorage.getItem("userInfo")));
+// const userInfo = ref(JSON.parse(localStorage.getItem("userInfo")));
 const URL = "//localhost:9090/";
 
-const userId = ref(userInfo.value.userId);
-const userName = ref(userInfo.value.userName);
-const userPassword = ref(userInfo.value.userPassword);
-const emailId = ref(userInfo.value.emailId);
-const emailDomain = ref(userInfo.value.emailDomain);
+const memberStore = useMemberStore();
+const { userInfo } = storeToRefs(memberStore);
+
+console.log(userInfo);
+console.log(userInfo.value);
+const userId = userInfo.value.userId;
+const userName = userInfo.value.userName;
+const userPassword = userInfo.value.userPassword;
+const emailId = userInfo.value.emailId;
+const emailDomain = userInfo.value.emailDomain;
+
+console.log(userId);
+console.log(userName);
 
 const infoModify = () => {
   axios

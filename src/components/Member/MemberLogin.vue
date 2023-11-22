@@ -1,62 +1,83 @@
 <script setup>
 import { ref /*watch*/ } from "vue";
-import "vue-router";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import { useMemberStore } from "@/stores/member";
+import { useMenuStore } from "@/stores/menu";
+
 import axios from "axios";
 
 import { Modal } from "bootstrap";
 import router from "@/router";
 
-const URL = "//localhost:9090/";
+const memberStore = useMemberStore();
 
-// why ref?
-const postMember = ref({
+const { isLogin } = storeToRefs(memberStore);
+const { userLogin, getUserInfo } = memberStore;
+const { changeMenuState } = useMenuStore();
+
+const loginUser = ref({
   userId: "",
   userPassword: "",
 });
 
-const remember = ref();
+const URL = "//localhost:9090/";
+// const remember = ref();
+// why ref?
 
 // postMember 객체의 변경을 감시하고, 변경 시 로그에 출력
 // postNenber.value 사용할 것 !!!
 // watch(postMember.value, (newValue, oldValue) => {});
 
-const memberLogin = () => {
-  // REST API를 통한 로그인 구현
-  axios.post(URL + "member/login", postMember.value).then((res) => {
-    if (res.data.userId === postMember.value.userId) {
-      // login success
-      console.log(res.data.userId);
-      console.log(res.data.userName);
-      console.log(res.data.userPassword);
-      console.log(res.data.emailId);
-      console.log(res.data.emailDomain);
+// jwt login
+const jwtLogin = async () => {
+  console.log("jwt login !!!");
+  console.log("login user", loginUser.value);
+  await userLogin(loginUser.value);
+  let token = sessionStorage.getItem("accessToken");
 
-      // 저장할 때, JSON.stringify
-      // 사용할 때, JSON.parse
-      localStorage.setItem(
-        "userInfo",
-        JSON.stringify({
-          userId: res.data.userId,
-          userName: res.data.userName,
-          userPassword: res.data.userPassword,
-          emailId: res.data.emailId,
-          emailDomain: res.data.emailDomain,
-        })
-      );
+  console.log("token >> ", token);
+  console.log("is login ? ", isLogin.value);
 
-      localStorage.setItem("userName", res.data.userName);
-
-      // router 사용하기 위해 < import router from "@/router" >
-      router.push({ path: "/" });
-    } else {
-      // login fail
-      // Modal 객체 사용하기 위해 < import { Modal } from "bootstrap" >
-      let myModal = new Modal(document.getElementById("loginModal"));
-      myModal.show();
-    }
-  });
-  console.log(postMember);
+  if (isLogin) {
+    getUserInfo(token);
+    changeMenuState();
+  }
+  router.push("/");
 };
+
+// 일반
+// const memberLogin = () => {
+//   // REST API를 통한 로그인 구현
+//   axios.post(URL + "member/login", postMember.value).then((res) => {
+//     if (res.data.userId === postMember.value.userId) {
+//       // login success
+//       // 저장할 때, JSON.stringify
+//       // 사용할 때, JSON.parse
+//       localStorage.setItem(
+//         "userInfo",
+//         JSON.stringify({
+//           userId: res.data.userId,
+//           userName: res.data.userName,
+//           userPassword: res.data.userPassword,
+//           emailId: res.data.emailId,
+//           emailDomain: res.data.emailDomain,
+//         })
+//       );
+
+//       localStorage.setItem("userName", res.data.userName);
+
+//       // router 사용하기 위해 < import router from "@/router" >
+//       router.push({ path: "/" });
+//     } else {
+//       // login fail
+//       // Modal 객체 사용하기 위해 < import { Modal } from "bootstrap" >
+//       let myModal = new Modal(document.getElementById("loginModal"));
+//       myModal.show();
+//     }
+//   });
+//   console.log(postMember);
+// };
 </script>
 
 <!-- use bootstrap's card component -->
@@ -77,7 +98,7 @@ const memberLogin = () => {
                   class="form-control"
                   id="userid"
                   placeholder="Enter your id"
-                  v-model="postMember.userId"
+                  v-model="loginUser.userId"
                 />
               </div>
               <div class="mb-3">
@@ -86,11 +107,12 @@ const memberLogin = () => {
                   type="password"
                   class="form-control"
                   id="password"
+                  v-model="loginUser.userPassword"
+                  @keyup.enter="jwtLogin"
                   placeholder="Enter your password"
-                  v-model="postMember.userPassword"
                 />
               </div>
-              <div class="mb-3 form-check">
+              <!-- <div class="mb-3 form-check">
                 <input
                   type="checkbox"
                   class="form-check-input"
@@ -100,7 +122,7 @@ const memberLogin = () => {
                 <label class="form-check-label" for="rememberMe"
                   >remember email</label
                 >
-              </div>
+              </div> -->
 
               <div>
                 <button
@@ -109,7 +131,7 @@ const memberLogin = () => {
                   data-bs-toggle=""
                   data-bs-target="#exampleModal"
                   id="loginbtn"
-                  @click.prevent="memberLogin"
+                  @click.prevent="jwtLogin"
                 >
                   Login
                 </button>
