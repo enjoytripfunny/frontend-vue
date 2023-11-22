@@ -19,16 +19,37 @@ function registMapResto(mapresto, success, fail) {
 
 // 내가 작성한 맛지도 가져오기
 function listMyMapResto(param, success, fail) {
-  local.get(`/mapresto/myMapResto`, { params: param }).then(success).catch(fail);
+  local
+    .get(`/mapresto/myMapResto`, { params: param })
+    .then(success)
+    .catch(fail);
 }
 
 //좋아요 누른 맛지도 가져오기
 function listLikeMapResto(param, success, fail) {
-  local.get(`/mapresto/likeMapResto`, { params: param }).then(success).catch(fail);
+  local
+    .get(`/mapresto/likeMapResto`, { params: param })
+    .then(success)
+    .catch(fail);
 }
 
 function getMapRestoView(mapRestoNo, success, fail) {
   local.get(`/mapresto/${mapRestoNo}`).then(success).catch(fail);
 }
 
-export { listMapResto, changeLike, registMapResto, listMyMapResto, listLikeMapResto, getMapRestoView };
+function getMapRestos(args, success, fail) {
+  local
+    .get(`/mapresto/userResto`, { params: { mapRestoNo: args } })
+    .then(success)
+    .catch(fail);
+}
+
+export {
+  listMapResto,
+  changeLike,
+  registMapResto,
+  listMyMapResto,
+  listLikeMapResto,
+  getMapRestoView,
+  getMapRestos,
+};

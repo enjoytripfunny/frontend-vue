@@ -39,16 +39,19 @@ const changeLike = () => {
     </template>
     <template v-if="mapResto.fileInfo.saveFile != null">
       <img
-        :src="`/src/assets/231120/${mapResto.fileInfo.saveFile}`"
+        :src="`/src/assets/${mapResto.fileInfo.saveFolder}/${mapResto.fileInfo.saveFile}`"
         style="width: 230px; height: 230px"
       />
     </template>
     <div style="display: flex">
       <router-link
-        :to="{ name: 'mapresto-view', params: { maprestono: mapResto.mapRestoNo } }"
+        :to="{
+          name: 'mapresto-view',
+          params: { maprestono: mapResto.mapRestoNo },
+        }"
         class="article-title link-dark"
       >
-      <h6>{{ mapResto.subject }}</h6>
+        <h6>{{ mapResto.subject }}</h6>
       </router-link>
       <img
         v-show="like.value == false"

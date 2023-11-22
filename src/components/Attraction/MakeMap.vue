@@ -8,7 +8,6 @@ import { start } from "@popperjs/core";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
-
 const BASIC_MARKER = "https://i1.daumcdn.net/dmaps/apis/n_local_blit_04.png";
 const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
@@ -129,70 +128,64 @@ const displayMarkers = () => {
         // 내 지도에 추가 버튼 클릭 시 실행되는 함수
         // 함수를 전역에 추가 !!!
         window.addResto = () => {
-          console.log(markers.value[index]);
           console.log(value);
           console.log("내 지도에 추가 버튼이 클릭되었습니다!");
 
-
           // 이미 추가됐는지 체크
 
-              starMap.value.forEach((key, v) => {
-                console.log("!!!", key.restoApiId, value.id);
-                if (key.restoApiId === value.id) {
-                  console.log("중복 !!!");
-                  return;
-                }
-              });
-
-              // starMarkers에 marker 추가
-              const newMarker = new kakao.maps.Marker({
-                map: toRaw(map.value),
-                position: new kakao.maps.LatLng(key.latitude, key.longitude),
-                image: new kakao.maps.MarkerImage(
-                    STAR_IMG,
-                    new kakao.maps.Size(31, 35)
-                ),
-              });
-
-              console.log("register place >> ", registeredPlace.value);
-              infowindow.value.close();
-              addStarMarker(newMarker, {
-                restoApiId: key.restoApiId,
-                restoName: key.restoName,
-                restoPhone: key.restoPhone,
-                category: key.category,
-                address: key.address,
-                latitude: key.latitude,
-                longitude: key.longitude,
-              });
-
-              // basicMarkers에서 marker 제거
-              value.setMap(null);
-              basicMap.value.delete(key);
-
-              console.log("star map >> ", starMap.value);
-              console.log("basic map >> ", basicMap.value);
-              infowindow.value.close();
+          starMap.value.forEach((key, v) => {
+            console.log("!!!", key.restoApiId, value.id);
+            if (key.restoApiId === value.id) {
+              console.log("중복 !!!");
+              return;
             }
-            ;
+          });
 
-            // 클릭 이벤트에 인포윈도우 표시
-            infowindow.value = new kakao.maps.InfoWindow({
-              zIndex: 1,
-              content: infowindowContent,
-              position: new kakao.maps.LatLng(key.latitude, key.longitude),
-              removable: true,
-            });
+          // starMarkers에 marker 추가
+          const newMarker = new kakao.maps.Marker({
+            map: toRaw(map.value),
+            position: new kakao.maps.LatLng(key.latitude, key.longitude),
+            image: new kakao.maps.MarkerImage(
+              STAR_IMG,
+              new kakao.maps.Size(31, 35)
+            ),
+          });
 
-            infowindow.value.open(map.value, value);
+          console.log("register place >> ", registeredPlace.value);
+          infowindow.value.close();
+          addStarMarker(newMarker, {
+            restoApiId: key.restoApiId,
+            restoName: key.restoName,
+            restoPhone: key.restoPhone,
+            category: key.category,
+            address: key.address,
+            latitude: key.latitude,
+            longitude: key.longitude,
+          });
 
+          // basicMarkers에서 marker 제거
+          value.setMap(null);
+          basicMap.value.delete(key);
 
+          console.log("star map >> ", starMap.value);
+          console.log("basic map >> ", basicMap.value);
+          infowindow.value.close();
+        };
 
-
-          console.log("basic map ...", basicMap.value);
+        // 클릭 이벤트에 인포윈도우 표시
+        infowindow.value = new kakao.maps.InfoWindow({
+          zIndex: 1,
+          content: infowindowContent,
+          position: new kakao.maps.LatLng(key.latitude, key.longitude),
+          removable: true,
         });
+
+        infowindow.value.open(map.value, value);
+
+        console.log("basic map ...", basicMap.value);
       });
-    }
+    });
+  }
 };
 
 function addStarMarker(newMarker, newData) {
@@ -470,6 +463,7 @@ const registeredPlaceClick = () => {
   console.log("click ~!~!~!");
 };
 
+const viewImageFile = ref();
 const uploadImageFile = ref(); // image source
 // 이미지 웹에 띄우기
 const onFileSelected = (event) => {
@@ -477,8 +471,8 @@ const onFileSelected = (event) => {
   if (input.files /* && input.files[0] */) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      uploadImageFile.value = input; // image source 매우 긴 영어
-      // uploadImageFile.value = e.target.result; // image source 매우 긴 영어
+      uploadImageFile.value = input;
+      viewImageFile.value = e.target.result; // image source 매우 긴 영어
     };
     reader.readAsDataURL(input.files[0]);
   }
@@ -523,8 +517,8 @@ const axiosInstance = axios.create({
     "Content-Type": "multipart/form-data", // Content-Type을 반드시 이렇게 하여야 한다.
   },
 });
-const subjectValue = ref('');
-const contentValue = ref('');
+const subjectValue = ref("");
+const contentValue = ref("");
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
@@ -543,40 +537,44 @@ const makeMap = () => {
   // formData.append("restoInfo", JSON.stringify(resData));
   // formData.append("restos", JSON.stringify(resData));
 
-  registeredPlace.value.forEach((data, index) => {
-    formData.append(`restos[${index}].restoApiId`, data.restoApiId);
-    formData.append(`restos[${index}].restoName`, data.restoName);
-    formData.append(`restos[${index}].restoPhone`, data.restoPhone);
-    formData.append(`restos[${index}].category`, data.category);
-    formData.append(`restos[${index}].address`, data.address);
-    formData.append(`restos[${index}].latitude`, data.latitude);
-    formData.append(`restos[${index}].longitude`, data.longitude);
+  var i = 0;
+  starMap.value.forEach((value, data, index) => {
+    console.log("!!! ", data, value, index);
+    console.log(data.restoApiId);
+    formData.append(`restos[${i}].restoApiId`, data.restoApiId);
+    formData.append(`restos[${i}].restoName`, data.restoName);
+    formData.append(`restos[${i}].restoPhone`, data.restoPhone);
+    formData.append(`restos[${i}].category`, data.category);
+    formData.append(`restos[${i}].address`, data.address);
+    formData.append(`restos[${i}].latitude`, data.latitude);
+    formData.append(`restos[${i}].longitude`, data.longitude);
+    i++;
     // ... append other RestoDto fields
   });
 
   selectLocation.value.forEach((data, index) => {
     formData.append(`tags[${index}]`, data);
-  })
+  });
   // formData.append("registerTime", "");
   // formData.append("content", JSON.stringify(restoMap.value));
 
   // // .post("/mapresto", restoMap.value)
   axios
-      .post("http://localhost:9090/mapresto/reg", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          // "Content-Type": "application/json;charset=utf-8",
-        },
-      })
-      // {
-      //   params: restoMap.value,
-      //   // params: postData.value,
-      // })
-      .then((response) => {
-        console.log(response);
-        router.push({name: "mapresto-list"});
-      })
-      .catch((error) => console.log(error));
+    .post("http://localhost:9090/mapresto/reg", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        // "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    // {
+    //   params: restoMap.value,
+    //   // params: postData.value,
+    // })
+    .then((response) => {
+      console.log(response);
+      router.push({ name: "mapresto-list" });
+    })
+    .catch((error) => console.log(error));
 };
 </script>
 
@@ -627,11 +625,7 @@ const makeMap = () => {
               </div>
               <div class="card-body">
                 <div class="thumbnail-container">
-                  <img
-                    class="thumbnail"
-                    :src="uploadImageFile"
-                    alt="사진 없음"
-                  />
+                  <img class="thumbnail" :src="viewImageFile" alt="사진 없음" />
                   <!-- <div>썸네일 사진</div> -->
                 </div>
                 <div>
