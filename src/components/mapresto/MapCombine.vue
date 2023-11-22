@@ -43,7 +43,7 @@ const basicMap = ref();
 const starMap = ref(new Map());
 
 // resto 관련
-const restoApiId = ref(new Map());
+const mapRestoMap = ref(new Map());
 
 const myMapResto = () => {
   listMyMapResto(
@@ -244,6 +244,8 @@ const deletePlace = (resto) => {
   // 마커 제거
   starMap.value.get(resto.restoApiId)[1].setMap(null);
   starMap.value.delete(resto.restoApiId);
+
+  mapRestoMap.forEach((item) => item);
 };
 const clicking = () => {
   console.log("clicking !!!", mapRestoNo);
@@ -255,11 +257,14 @@ const getRestos = (args) => {
     args[1],
     ({ data }) => {
       console.log("listLikeMapResto data: ", data);
+      const restoIds = [];
+      data.userRestoList.forEach((item) => restoIds.push(item.restoApiId));
 
-      restoApiId.value.length = 0;
+      mapRestoMap.value.set(args[1], [restoIds.length, restoIds]);
+      console.log(mapRestoMap.value);
+
       // 마커 가져와서 찍기
       data.userRestoList.forEach((data) => {
-        restoApiId.value.push(data.restoApiId);
         if (args[0] === true) {
           // 추가할 맛집이 이미 존재하면 다음으로
           if (starMap.value.has(data.restoApiId)) return;
