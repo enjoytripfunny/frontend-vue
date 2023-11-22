@@ -104,7 +104,7 @@ const logout = () => {
 
       <div>
         <!-- 로그인 X -->
-        <div v-if="!menuList[4].show">
+        <div v-if="!menuList[0].show">
           <router-link to="/member/signup">
             <button
               class="btn btn-outline-success"
