@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from "vue";
 import { Modal } from "bootstrap";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import router from "@/router";
+import { httpStatusCode } from "@/util/http-status.js";
 
 const URL = "//localhost:9090/";
 
@@ -47,14 +48,14 @@ const memberJoin = () => {
         emailDomain: emailDomain.value,
       })
       .then((response) => {
-        console.log(response.data);
-
-        if (response.data.msg == "id check") {
-          // id check modal
+        if (response.data.msg === "false") {
           new Modal(document.getElementById("idCheckModal")).show();
         } else {
           router.push({ path: "/" });
         }
+      })
+      .catch((error) => {
+        console.log(error);
       });
   }
 };

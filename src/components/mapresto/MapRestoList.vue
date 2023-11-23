@@ -27,9 +27,9 @@ const mapRestoParam = ref({
   userId: memberStore.getUserId,
   num: listCount.value,
   total: totalMapResto.value,
-  checkUserId: "",//나의 맛지도만 불러오기
-  orderkey: "register_time",//정렬할 키
-  ordervalue: "desc"//내림차순, 오름차순
+  checkUserId: "", //나의 맛지도만 불러오기
+  orderkey: "register_time", //정렬할 키
+  ordervalue: "desc", //내림차순, 오름차순
 });
 
 onMounted(() => {
@@ -52,7 +52,7 @@ const getMapRestoList = () => {
     console.log("좋아요 순");
     mapRestoParam.value.orderkey = "like_count";
     mapRestoParam.value.ordervalue = "desc";
-  } else if(old.value) {
+  } else if (old.value) {
     console.log("오래된 순");
     mapRestoParam.value.orderkey = "register_time";
     mapRestoParam.value.ordervalue = "";
@@ -60,7 +60,7 @@ const getMapRestoList = () => {
     console.log("최신순");
     mapRestoParam.value.orderkey = "register_time";
     mapRestoParam.value.ordervalue = "desc";
-  } 
+  }
   listMapResto(
     mapRestoParam.value,
     ({ data }) => {
@@ -78,7 +78,7 @@ watch(
   () => isChecked.value,
   () => {
     getMapRestoList();
-  },
+  }
 );
 
 const addList = () => {
@@ -159,11 +159,11 @@ const clickOptions3 = () => {
         <!-- 최신순, 좋아요순, 오래된순-->
         <div class="mx-3">
           <template v-if="memberStore.getUserId != null">
-          <label class="custom-checkbox">
-            <input type="checkbox" v-model="isChecked"/>My
-            <span class="checkmark"></span>
-          </label>
-        </template>
+            <label class="custom-checkbox">
+              <input type="checkbox" v-model="isChecked" />My
+              <span class="checkmark"></span>
+            </label>
+          </template>
           <div
             class="btn mx-2"
             :class="{

@@ -603,7 +603,12 @@ const makeMap = () => {
               </div>
               <div class="card-body">
                 <div class="thumbnail-container">
-                  <img class="thumbnail" :src="webMapRestImg" alt="사진 없음" />
+                  <img
+                    class="thumbnail"
+                    :src="webMapRestImg"
+                    alt="사진 없음"
+                    style="height: 45vh"
+                  />
                 </div>
                 <div>
                   <input type="file" @change="onFileSelected" />

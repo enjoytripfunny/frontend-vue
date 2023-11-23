@@ -69,6 +69,20 @@ const logout = () => {
               >지도 합치기</router-link
             >
           </li>
+
+          <!-- <li class="nav-item nav-item-margin">
+            <form class="d-flex" role="search">
+              <input
+                class="form-control me-2"
+                type="search"
+                placeholder="검색..."
+                aria-label="Search"
+              />
+              <button class="btn btn-outline-success" type="button">
+                search
+              </button>
+            </form>
+          </li> -->
         </ul>
       </div>
 
