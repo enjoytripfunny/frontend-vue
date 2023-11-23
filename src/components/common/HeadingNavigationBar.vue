@@ -1,10 +1,10 @@
 <script setup>
-import { onMounted,  ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import { useMenuStore } from "@/stores/menu";
 import { useMemberStore } from "@/stores/member";
 import { storeToRefs } from "pinia";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const menuStore = useMenuStore();
 const memberStore = useMemberStore();
@@ -12,37 +12,10 @@ const router = useRouter();
 // 반응형을 유지하면서 스토어에서 속성을 추출하려면, storeToRefs()를 사용
 // https://pinia.vuejs.kr/core-concepts/
 const { menuList } = storeToRefs(menuStore);
-const { getUserName, getUserId  } = storeToRefs(memberStore);
+const { getUserName, getUserId } = storeToRefs(memberStore);
 const { userLogout } = memberStore;
 // const { getUserName } = memberStore;
 const { changeMenuState } = menuStore;
-
-onMounted(() => {
-  /*if (localStorage.getItem("userInfo")) {
-    loginCheck.value = true;
-    userName.value = JSON.parse(localStorage.getItem("userInfo")).userName;
-    console.log();
-  } else {
-    loginCheck.value = false;
-  }*/
-});
-
-// watch(userInfo.value.userName, (newValue, oldValue) => {
-//   console.log("변경 watch 값: ", newValue);
-//   userName.value = newValue.userName;
-// });
-
-// watch(
-//   () => userInfo.value,
-//   (data) => {
-//     userName.value = data.userName;
-//   },
-//   { immediate: true, deep: true }
-// );
-
-// watch(userName, () => {
-//   window.location.reload();
-// });
 
 const logout = () => {
   console.log("로그아웃!!!!");
@@ -51,7 +24,7 @@ const logout = () => {
   console.log("로그아웃하는 아이디: ", getUserId.value);
   changeMenuState();
   userLogout(getUserId.value);
-  router.push({name: "home"});
+  router.push({ name: "home" });
 };
 </script>
 
@@ -167,8 +140,9 @@ const logout = () => {
             </li>
 
             <li>
-              <router-link to="/member/modify"
-                ><a class="dropdown-item" href="#">마이페이지</a></router-link
+              <!-- <router-link :to="{ name: 'member-modify' }">마이페이지</router-link> -->
+              <router-link :to="{ name: 'member-modify' }" class="nav-link"
+                >마이페이지</router-link
               >
             </li>
           </ul>

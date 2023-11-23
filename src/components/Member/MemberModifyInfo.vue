@@ -1,53 +1,42 @@
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import { Modal } from "bootstrap";
 import router from "@/router";
 import { RouterLink } from "vue-router";
 import { useMemberStore } from "@/stores/member";
+import { modifyUserInfo, deleteUser } from "@/api/user";
 import { storeToRefs } from "pinia";
+import { useMenuStore } from "@/stores/menu";
 
-// const userInfo = ref(JSON.parse(localStorage.getItem("userInfo")));
-const URL = "//localhost:9090/";
-
+const menuStore = useMenuStore();
 const memberStore = useMemberStore();
 const { userInfo } = storeToRefs(memberStore);
+const { changeMenuState } = menuStore;
+const { userLogout, getUserInfo } = memberStore;
 
-console.log(userInfo);
-console.log(userInfo.value);
-const userId = userInfo.value.userId;
-const userName = userInfo.value.userName;
-const userPassword = userInfo.value.userPassword;
-const emailId = userInfo.value.emailId;
-const emailDomain = userInfo.value.emailDomain;
+console.log("userInfo: ", userInfo.value);
 
-console.log(userId);
-console.log(userName);
+const newUserInfo = ref({
+  userId: userInfo.value.userId,
+  userName: userInfo.value.userName,
+  emailId: userInfo.value.emailId,
+  emailDomain: userInfo.value.emailDomain,
+});
 
 const infoModify = () => {
-  axios
-    .post(URL + "/member/modify", {
-      userId: userId.value,
-      userName: userName.value,
-      userPassword: userInfo.value.userPassword,
-      emailId: emailId.value,
-      emailDomain: emailDomain.value,
-    })
-    .then((response) => {
-      console.log(response);
-      if (response.data.msg === "success") {
-        localStorage.setItem(
-          "userInfo",
-          JSON.stringify({
-            userId: userId.value,
-            userName: userName.value,
-            userPassword: userPassword.value,
-            emailId: emailId.value,
-            emailDomain: emailDomain.value,
-          })
-        );
+  modifyUserInfo(
+    newUserInfo.value,
+    (response) => {
+      console.log("infoModify response: ", response);
+      let token = sessionStorage.getItem("accessToken");
+      if (userInfo.value != null && token) {
+        getUserInfo(token);
       }
-    });
+
+      // router.push({ name: "home" });
+    },
+    (error) => console.log("infoModify error: ", error)
+  );
 };
 
 const deleteModal = () => {
@@ -57,19 +46,18 @@ const deleteModal = () => {
 
 const userDelete = () => {
   // delete
-
-  axios
-    .get(URL + "member/delete", {
-      params: {
-        userId: userId.value,
-      },
-    })
-    .then((response) => {
-      if (response.data.msg === "success") {
-        localStorage.clear();
-        router.push({ path: "/" });
-      }
-    });
+  deleteUser(
+    { userId: userInfo.value.userId },
+    (response) => {
+      console.log("userDelete response: ", response);
+      localStorage.clear();
+      sessionStorage.clear();
+      changeMenuState();
+      userLogout(userInfo.value.userId);
+      router.push({ name: "home" });
+    },
+    (error) => console.log("userDelete error: ", error)
+  );
 };
 </script>
 
@@ -80,7 +68,7 @@ const userDelete = () => {
         <div class="card">
           <!-- header -->
           <div class="card-header">
-            <h3 class="text-center">my page</h3>
+            <h3 class="text-center">회원 정보 수정</h3>
           </div>
           <!-- body-->
           <div class="card-body">
@@ -91,8 +79,7 @@ const userDelete = () => {
                 <input
                   type="text"
                   class="form-control"
-                  :placeholder="userInfo.userId"
-                  v-model="userId"
+                  v-model="newUserInfo.userId"
                   readonly
                 />
               </div>
@@ -102,8 +89,7 @@ const userDelete = () => {
                 <input
                   type="text"
                   class="form-control"
-                  :placeholder="userInfo.userName"
-                  v-model="userName"
+                  v-model="newUserInfo.userName"
                 />
               </div>
 
@@ -116,8 +102,7 @@ const userDelete = () => {
                   type="text"
                   class="form-control"
                   id="email"
-                  placeholder="Enter your email"
-                  v-model="emailId"
+                  v-model="newUserInfo.emailId"
                 />
                 <!-- @ -->
                 <span class="input-group-text">@</span>
@@ -125,7 +110,7 @@ const userDelete = () => {
                 <select
                   class="form-select"
                   id="emailDomain"
-                  v-model="emailDomain"
+                  v-model="newUserInfo.emailDomain"
                   required
                 >
                   <option value="" selected disabled>Select domain</option>

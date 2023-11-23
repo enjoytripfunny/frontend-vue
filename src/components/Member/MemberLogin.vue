@@ -21,7 +21,6 @@ const loginUser = ref({
   userPassword: "",
 });
 
-const URL = "//localhost:9090/";
 // const remember = ref();
 // why ref?
 
