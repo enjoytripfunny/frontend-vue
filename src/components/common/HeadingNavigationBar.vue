@@ -49,16 +49,6 @@ const logout = () => {
             </router-link>
           </li>
           <li class="nav-item nav-item-margin">
-            <router-link to="/attraction" class="nav-link" href="#"
-              >지도</router-link
-            >
-          </li>
-          <li class="nav-item nav-item-margin">
-            <router-link :to="{ name: 'trip-board' }" class="nav-link"
-              >게시판</router-link
-            >
-          </li>
-          <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-list' }"
               class="nav-link"
@@ -66,14 +56,11 @@ const logout = () => {
               >맛지도 보기</router-link
             >
           </li>
-          <!-- <li class="nav-item nav-item-margin">
-            <router-link
-              :to="{ name: 'mapresto-register' }"
-              class="nav-link"
-              href="#"
+          <li class="nav-item nav-item-margin">
+            <router-link :to="{ name: 'makemap' }" class="nav-link"
               >맛지도 등록</router-link
             >
-          </li> -->
+          </li>
           <li class="nav-item nav-item-margin">
             <router-link
               :to="{ name: 'mapresto-combine' }"
@@ -81,20 +68,6 @@ const logout = () => {
               href="#"
               >지도 합치기</router-link
             >
-          </li>
-
-          <li class="nav-item nav-item-margin">
-            <form class="d-flex" role="search">
-              <input
-                class="form-control me-2"
-                type="search"
-                placeholder="검색..."
-                aria-label="Search"
-              />
-              <button class="btn btn-outline-success" type="button">
-                search
-              </button>
-            </form>
           </li>
         </ul>
       </div>

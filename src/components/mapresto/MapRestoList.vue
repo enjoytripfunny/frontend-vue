@@ -66,24 +66,9 @@ const addList = () => {
       <div class="col-lg-10">
         <div class="row align-self-center mb-2">
           <div class="col-md-5 offset-5">
-            <label>검색 또는 필터</label><input type="text" />
+            <!-- <label>검색 또는 필터</label><input type="text" /> -->
             <!-- <form class="d-flex" @submit.prevent="getArticleList">
               <VSelect :selectOption="selectOption" @onKeySelect="changeKey" />
-              <div class="input-group input-group-sm">
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="param.word"
-                  placeholder="검색어..."
-                />
-                <button
-                  class="btn btn-dark"
-                  type="button"
-                  @click="getArticleList"
-                >
-                  검색
-                </button>
-              </div>
             </form> -->
           </div>
           <div class="col-md-2 text-start">

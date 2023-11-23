@@ -41,41 +41,6 @@ const router = createRouter({
       component: () => import("@/views/AttractionView.vue"),
     },
     {
-      path: "/tripboard",
-      name: "trip-board",
-      component: TripBoardView,
-      // redirect: "/r06/board/list",
-      redirect: { name: "trip-board-list" },
-      children: [
-        {
-          path: "list",
-          name: "trip-board-list",
-          component: BoardList,
-          // component: () => import("@/components/tripboard/BoardList.vue"),
-        },
-        {
-          path: "write",
-          name: "trip-board-write",
-          beforeEnter: onlyAuthUser,
-          component: BoardWrite,
-          // component: () => import("@/components/tripboard/BoardWrite.vue"),
-        },
-        {
-          path: "modify/:articleno",
-          name: "trip-board-modify",
-          beforeEnter: onlyAuthUser,
-          component: BoardModify,
-          // component: () => import("@/components/tripboard/BoardModify.vue"),
-        },
-        {
-          path: "detail/:articleno",
-          name: "trip-board-detail",
-          component: BoardDetail,
-          // component: () => import("@/components/tripboard/BoardDetail.vue"),
-        },
-      ],
-    },
-    {
       path: "/member",
       name: "member",
       component: () => import("@/views/MemberView.vue"),
@@ -117,11 +82,6 @@ const router = createRouter({
       beforeEnter: onlyAuthUser,
       component: () => import("@/components/Attraction/MakeMap.vue"),
     },
-    // {
-    //   path: "/image/test",
-    //   name: "imagetest",
-    //   component: () => import("@/components/Attraction/ImageUploadTest.vue"),
-    // },
     {
       path: "/mapresto",
       name: "mapresto",
@@ -132,12 +92,6 @@ const router = createRouter({
           path: "list",
           name: "mapresto-list",
           component: () => import("@/components/mapresto/MapRestoList.vue"),
-        },
-        {
-          path: "register",
-          name: "mapresto-register",
-          beforeEnter: onlyAuthUser,
-          component: () => import("@/components/mapresto/MapRestoReg.vue"),
         },
         {
           path: "combine",
