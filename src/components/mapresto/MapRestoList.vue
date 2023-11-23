@@ -3,7 +3,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import MapRestoListItem from "./item/MapRestoListItem.vue";
 import { listMapResto } from "@/api/map-resto.js";
-import { useMemberStore } from '@/stores/member';
+import { useMemberStore } from "@/stores/member";
 import { storeToRefs } from "pinia";
 
 const memberStore = useMemberStore();
@@ -15,25 +15,16 @@ const moveRegMapResto = () => {
   router.push({ name: "makemap" });
 };
 
-const listCount = ref(1);
+const listCount = ref(0);
 const totalMapResto = ref(12);
 const maxPage = ref(1);
-// const calMaxPage = computed(() => {
-//   maxPage.value = Math.ceil(totalMapResto.value / 12);
-// })
-// watch(totalMapResto, (newData, oldData) => {
-//   maxPage.value = Math.ceil(totalMapResto.value / 12);
-//   console.log("maxPage.value: " + maxPage.value);
-// });
-
 const mapRestoList = ref([]);
 const mapRestoParam = ref({
-  num: 0,
-  total: 12,
+  // num: 0,
+  // total: 12,
   userId: memberStore.getUserId,
-  // num: listCount.value,
-  // total: totalMapResto.value,
-  // userId: "ssafy",
+  num: listCount.value,
+  total: totalMapResto.value,
 });
 
 onMounted(() => {
@@ -49,7 +40,7 @@ const getMapRestoList = () => {
       mapRestoList.value = data.list;
       // totalMapResto.value = data.total;
       mapRestoParam.value.total = data.total;
-      maxPage.value = Math.ceil(mapRestoParam.value.total / 12);
+      maxPage.value = Math.floor(mapRestoParam.value.total / 12);
     },
     (error) => console.log("getMapRestoList error: ", error)
   );
@@ -57,14 +48,10 @@ const getMapRestoList = () => {
 };
 
 const addList = () => {
-  if (totalMapResto.value >= listCount.value) {
-    listCount.value = listCount.value + 1;
+  if (maxPage.value > listCount.value) {
+    mapRestoParam.value.num++;
     getMapRestoList();
   }
-  // if (maxPage.value >= listCount.value) {
-  //   listCount.value++;
-  //   getMapRestoList();
-  // }
 };
 </script>
 

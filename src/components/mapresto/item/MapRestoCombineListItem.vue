@@ -31,7 +31,8 @@ watch(
 </script>
 
 <template>
-  <li class="marRestoCardItem">
+  <!-- <li class="marRestoCardItem"> -->
+  <div class="marRestoCardItem">
     <div
       :class="{
         checkedItem: ischekced,
@@ -41,7 +42,7 @@ watch(
       <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
       <img
         :src="`/src/assets/${mapResto.mapResto.fileInfo.saveFolder}/${mapResto.mapResto.fileInfo.saveFile}`"
-        style="width: 150px; height: 200px"
+        style="width: 15vh; height: 20vh"
         @click="emitArgs"
       />
       <div>
@@ -50,7 +51,8 @@ watch(
       </div>
     </div>
     <div>{{ count[0] }}</div>
-  </li>
+  </div>
+  <!-- </li> -->
 </template>
 
 <style scoped>

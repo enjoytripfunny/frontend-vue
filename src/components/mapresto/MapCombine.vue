@@ -6,8 +6,13 @@ import {
 } from "@/api/map-resto.js";
 import { onMounted, ref, toRaw, watch } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
-import { useRouter } from 'vue-router';
-import { useMemberStore } from '@/stores/member';
+import { useRouter } from "vue-router";
+import { useMemberStore } from "@/stores/member";
+
+const swiperOptions = ref({
+  direction: "horizontal",
+  loop: true,
+});
 
 const count = {
   count: false,
@@ -399,6 +404,31 @@ const classname = document.getElementsByClassName("confetti-button");
 for (var i = 0; i < classname.length; i++) {
   classname[i].addEventListener("click", animateButton, false);
 }
+
+const sliding = () => {
+  console.log("sliding !!!");
+  myMapResto();
+};
+
+const startX = ref();
+const startY = ref();
+const endX = ref();
+const endY = ref();
+
+function mousedown(event) {
+  startX.value = event.clientX; // 클릭 시작 X 좌표
+  startY.value = event.clientY; // 클릭 시작 Y 좌표
+}
+
+function mouseup(event) {
+  // 마우스 클릭 끝날 시 실행되는 코드
+  endX.value = event.clientX; // 클릭 끝 X 좌표
+  endY.value = event.clientY; // 클릭 끝 Y 좌표
+
+  // 클릭 시작과 끝 지점의 좌표를 출력합니다.
+  console.log(`시작 좌표: (${startX.value}, ${startY.value})`);
+  console.log(`끝 좌표: (${endX.value}, ${endY.value})`);
+}
 </script>
 
 <template>
@@ -410,150 +440,168 @@ for (var i = 0; i < classname.length; i++) {
           <mark class="sky">지도 Combine</mark>
         </h2>
       </div>
-      <div class="col-lg-6" id = "captureMapArea">
-        <img
-          src="@/assets/231120/dc63959c-e527-4d84-b53c-65261d2acf78.jpg"
-          style="width: 600px; height: 600px"
-        />
-        <button @click="captureMap">Capture</button>
-      </div>
-      <div class="col-lg-6">
-        <div class="row map-list">
-          <h3>나의 지도 리스트</h3>
-          <ul class="mapRestoCard">
-            <img
-              src="@/assets/img/left.png"
-              class="pre-button"
-              @click="prePageMySelect"
-            />
-            <!-- <button class="mapPage">pre</button> -->
-            <MapRestoCombineListItem
-              v-for="mapResto in myMapList"
-              :key="mapResto.mapRestoNo"
-              :mapResto="mapResto"
-            >
-            </MapRestoCombineListItem>
-            <!-- <button class="mapPage">next</button> -->
-            <img
-              src="@/assets/img/right.png"
-              class="next-button"
-              @click="nextPageMySelect"
-            />
-          </ul>
-        </div>
-        <div class="row map-list">
-          <h3>좋아요 지도 리스트</h3>
-          <ul class="mapRestoCard">
-            <img
-              src="@/assets/img/left.png"
-              class="pre-button"
-              @click="prePageLikeSelect"
-            />
-            <MapRestoCombineListItem
-              v-for="mapResto in likeMapList"
-              :key="mapResto.mapRestoNo"
-              :mapResto="mapResto"
-            >
-            </MapRestoCombineListItem>
-            <img
-              src="@/assets/img/right.png"
-              class="next-button"
-              @click="nextPageLikeSelect"
-            />
-          </ul>
-    <div class="col-lg-12">
-      <h2 class="my-3 py-3 shadow-sm bg-light text-center">
-        <mark class="sky">지도 Combine</mark>
-      </h2>
-    </div>
-    <div class="row justify-content-center">
-      <!-- left side -->
-      <div class="row">
-        <div class="col-5">
-          <div class="map_wrap">
-            <div
-              id="map"
-              :class="{ notHasMarker: starMap.size === 0 ? true : false }"
-              style="position: relative; overflow: hidden"
-            ></div>
-            <ul id="category" style="margin-left: 20px">
-              <li id="FD6" data-order="0" class="restaurant">음식점</li>
-              <li id="CE7" data-order="0" class="cafe">카페</li>
-              <li id="">X</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- right side -->
-        <!-- <div class="row"> -->
-        <div id="mapList" class="col-4" style="height: 75vh; overflow-y: auto">
-          <!-- 나의 지도 리스트 -->
+      <div class="">
+        <div class="row justify-content-center">
+          <!-- left side -->
           <div class="row">
-            <h3 class="text-center">나의 지도 리스트</h3>
-            <ul class="mapRestoCard" style="height: 300px">
-              <MapRestoCombineListItem
-                v-for="mapResto in myMapList"
-                :key="mapResto.mapRestoNo"
-                :value="mapResto.restoApiId"
-                :mapResto="mapResto"
-                draggable="true"
-                @some-event="clicking"
-                @emit-args="getRestos"
-                :count="
-                  mapRestoMap.get(mapResto.mapRestoNo) != null
-                    ? mapRestoMap.get(mapResto.mapRestoNo)
-                    : [0, null]
-                "
-              >
-              </MapRestoCombineListItem>
-            </ul>
-          </div>
+            <div class="col-5">
+              <div class="map_wrap">
+                <div
+                  id="map"
+                  :class="{ notHasMarker: starMap.size === 0 ? true : false }"
+                  style="position: relative; overflow: hidden"
+                ></div>
+                <ul id="category" style="margin-left: 20px">
+                  <li id="FD6" data-order="0" class="restaurant">음식점</li>
+                  <li id="CE7" data-order="0" class="cafe">카페</li>
+                  <li id="">X</li>
+                </ul>
+              </div>
+            </div>
 
-          <!-- 북마크 지도 리스트 -->
-          <div class="row">
-            <h3 class="text-center">좋아요 지도 리스트</h3>
-            <ul class="mapRestoCard" style="height: 300px">
-              <MapRestoCombineListItem
-                v-for="mapResto in likeMapList"
-                :key="mapResto.mapRestoNo"
-                :mapResto="mapResto"
-              >
-              </MapRestoCombineListItem>
-            </ul>
-          </div>
-        </div>
+            <!-- right side -->
+            <!-- 나의 지도 리스트 -->
+            <div id="mapList" class="col-4">
+              <div class="row" style="overflow-y: auto">
+                <h3 class="text-center">나의 지도 리스트</h3>
+                <ul class="mapRestoCard">
+                  <!-- <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      height: 90%;
+                    "
+                  >
+                    <img
+                      src="@/assets/img/left.png"
+                      class="pre-button"
+                      @click="prePageMySelect"
+                    />
+                  </div> -->
+                  <!-- <button class="mapPage">pre</button> -->
+                  <MapRestoCombineListItem
+                    v-for="mapResto in myMapList"
+                    :key="mapResto.mapRestoNo"
+                    :value="mapResto.restoApiId"
+                    :mapResto="mapResto"
+                    draggable="true"
+                    @some-event="clicking"
+                    @emit-args="getRestos"
+                    :count="
+                      mapRestoMap.get(mapResto.mapRestoNo) != null
+                        ? mapRestoMap.get(mapResto.mapRestoNo)
+                        : [0, null]
+                    "
+                  >
+                  </MapRestoCombineListItem>
+                  <!-- <button class="mapPage">next</button> -->
+                  <!-- <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      height: 90%;
+                    "
+                  >
+                    <img
+                      src="@/assets/img/right.png"
+                      class="next-button"
+                      @click="nextPageMySelect"
+                    />
+                  </div> -->
+                </ul>
+              </div>
 
-        <div
-          id="restoList"
-          class="col-2"
-          style="height: 75vh; overflow-y: auto"
-          :style="{
-            border: starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
-          }"
-        >
-          <div class="text-center" style="margin-top: 10px">내 지도 맛집</div>
-          <div>
+              <!-- 북마크 지도 리스트 -->
+              <div class="row" style="overflow-y: auto">
+                <h3 class="text-center">좋아 지도 리스트</h3>
+                <ul class="mapRestoCard">
+                  <!-- <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      height: 90%;
+                    "
+                  >
+                    <img
+                      src="@/assets/img/left.png"
+                      class="pre-button"
+                      @click="prePageLikeSelect"
+                    />
+                  </div> -->
+
+                  <!-- <button class="mapPage">pre</button> -->
+                  <MapRestoCombineListItem
+                    v-for="mapResto in likeMapList"
+                    :key="mapResto.mapRestoNo"
+                    :value="mapResto.restoApiId"
+                    :mapResto="mapResto"
+                    draggable="true"
+                    @some-event="clicking"
+                    @emit-args="getRestos"
+                    :count="
+                      mapRestoMap.get(mapResto.mapRestoNo) != null
+                        ? mapRestoMap.get(mapResto.mapRestoNo)
+                        : [0, null]
+                    "
+                  >
+                  </MapRestoCombineListItem>
+                  <!-- <button class="mapPage">next</button> -->
+                  <!-- <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      height: 90%;
+                    "
+                  >
+                    <img
+                      src="@/assets/img/right.png"
+                      class="next-button"
+                      @click="nextPageLikeSelect"
+                    />
+                  </div> -->
+                </ul>
+              </div>
+            </div>
             <div
-              v-for="resto in Array.from(starMap.values()).map(
-                (item) => item[0]
-              )"
-              :key="resto.restoApiId"
-              :value="resto.restoApiId"
-              class="list-item badge-item confetti-button"
-              style="line-height: 200%; margin: 10px 0"
-              @click.prevent="itemClick(resto.restoApiId)"
+              id="restoList"
+              class="col-2"
+              style="height: 75vh; overflow-y: auto"
+              :style="{
+                border:
+                  starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
+              }"
             >
-              <div class="item-container">
-                <div class="" style="padding: 5px">
-                  {{ resto.restoName }}
+              <div class="text-center" style="margin-top: 10px">
+                내 지도 맛집
+              </div>
+              <div>
+                <div
+                  v-for="resto in Array.from(starMap.values()).map(
+                    (item) => item[0]
+                  )"
+                  :key="resto.restoApiId"
+                  :value="resto.restoApiId"
+                  class="list-item badge-item confetti-button"
+                  style="line-height: 200%; margin: 10px 0"
+                  @click.prevent="itemClick(resto.restoApiId)"
+                >
+                  <div class="item-container">
+                    <div class="" style="padding: 5px">
+                      {{ resto.restoName }}
+                    </div>
+
+                    <button
+                      type="button"
+                      class="btn-close"
+                      aria-label="close"
+                      @click.prevent="deletePlace(resto)"
+                    ></button>
+                  </div>
                 </div>
-
-                <button
-                  type="button"
-                  class="btn-close"
-                  aria-label="close"
-                  @click.prevent="deletePlace(resto)"
-                ></button>
               </div>
             </div>
           </div>

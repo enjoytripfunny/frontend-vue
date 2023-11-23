@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
-import { registerLike } from '@/api/map-resto';
-import { useMemberStore } from '@/stores/member';
+import { registerLike } from "@/api/map-resto";
+import { useMemberStore } from "@/stores/member";
 
 const mapRestoProps = defineProps({ mapResto: Object });
 const mapResto = mapRestoProps.mapResto;
@@ -16,22 +16,24 @@ const likeInfo = ref({
 });
 
 const changeLike = () => {
+  if (memberStore.getUserId != null) {
     like.value = like.value == 1 ? -1 : 1;
     likeInfo.value.likeValue = like.value;
-  registerLike(
-    likeInfo.value,
-    (response) => {
-      console.log("changeLike response: " + response);
-    },
-    (error) => console.error(error)
-  );
+    registerLike(
+      likeInfo.value,
+      (response) => {
+        console.log("changeLike response: " + response);
+      },
+      (error) => console.error(error)
+    );
+  }
 };
 </script>
 
 <template>
   <li class="marRestoCardItem">
     <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
-    <template v-if="mapResto.fileInfo.saveFile == null">
+    <template v-if="mapResto.fileInfo == null">
       <router-link
         :to="{
           name: 'mapresto-view',
@@ -45,7 +47,7 @@ const changeLike = () => {
         />
       </router-link>
     </template>
-    <template v-if="mapResto.fileInfo.saveFile != null">
+    <template v-if="mapResto.fileInfo != null">
       <router-link
         :to="{
           name: 'mapresto-view',
@@ -61,9 +63,9 @@ const changeLike = () => {
     </template>
     <div style="display: flex">
       <div style="display: flex">
-      <h6>{{ mapResto.subject }}</h6>
+        <h6>{{ mapResto.subject }}</h6>
 
-      <router-link
+        <!-- <router-link
         :to="{
           name: 'mapresto-view',
           params: { maprestono: mapResto.mapRestoNo },
@@ -71,14 +73,20 @@ const changeLike = () => {
         class="article-title link-dark"
       >
         <h6>{{ mapResto.subject }}</h6>
-      </router-link>
-      <img
-        v-show="like == -1"
-        src="@/assets/img/beforeLike.png"
-        style="width: 20px; height: 20px; margin-left: auto"
-        @click="changeLike"
-      />
-    </div>
+      </router-link> -->
+        <img
+          v-show="like == -1"
+          src="@/assets/img/beforeLike.png"
+          style="width: 20px; height: 20px; margin-left: auto"
+          @click="changeLike"
+        />
+        <img
+          v-show="like == 1"
+          src="@/assets/img/afterLike.png"
+          style="width: 20px; height: 20px; margin-left: auto"
+          @click="changeLike"
+        />
+      </div>
     </div>
     <span>{{ mapResto.userId }}</span>
     <div>

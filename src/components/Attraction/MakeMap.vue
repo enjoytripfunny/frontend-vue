@@ -4,7 +4,7 @@ import { onMounted, ref, toRaw } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { registMapResto } from "../../api/map-resto";
-import { start } from "@popperjs/core";
+import { useMemberStore } from "@/stores/member";
 
 const KAKAO_SERVICE_KEY = "066c4bf5fb8745fcc2b066ec145bb938";
 
@@ -17,6 +17,7 @@ const RED_STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284425565-a9fbb114-dba8-4b0e-93c9-769de765b914.png";
 
 const router = useRouter();
+const memberStore = useMemberStore();
 
 const map = ref(); // map object
 const ps = ref(); // place search object
@@ -464,7 +465,7 @@ const registeredPlaceClick = () => {
   console.log("click ~!~!~!");
 };
 
-const uploadImageFile = ref(); // image source
+const uploadImageFile = ref(null); // image source
 const webMapRestImg = ref();
 // 이미지 웹에 띄우기
 const onFileSelected = (event) => {
@@ -500,76 +501,57 @@ const optionClick = (locate) => {
   console.log(selectLocation.value);
 };
 
-const restoMap = ref({
-  mapRestoNo: 0, //맛지도 인덱스
-  userId: "ssafy", //맛지도 만든 사용자 아이디
-  subject: subject.value, //맛지도 제목
-  content: content.value, //맛지도 간단 설명
-  fileInfo: uploadImageFile.value, //맛지도 썸네일
-  restos: registeredPlace.value, //맛지도안에 맛집들의 api 아이디
-  tags: selectLocation.value, //맛지도에 대한 태그
-  registerTime: "", //맛지도 만들어진 날짜
-});
-
-// 기본적인 설정
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:9090", // 기본 URL 설정
-  mode: "cors",
-  headers: {
-    "Content-Type": "multipart/form-data", // Content-Type을 반드시 이렇게 하여야 한다.
-  },
-});
-const subjectValue = ref('');
-const contentValue = ref('');
+const subjectValue = ref("");
+const contentValue = ref("");
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
   console.log("make map !!!");
 
-  const formData = new FormData();
-  formData.append("file", uploadImageFile.value.files[0]);
+  if (subjectValue.value.length == 0) {
+    alert("제목을 입력해주세요.");
+  } else if (contentValue.value.length == 0) {
+    alert("내용을 입력해주세요.");
+  } else if (starMap.value.size == 0) {
+    alert("맛집을 추가해주세요.");
+  } else {
+    console.log("사진 값: ", uploadImageFile.value);
+    const formData = new FormData();
+    if (uploadImageFile.value != null) {
+      formData.append("file", uploadImageFile.value.files[0]);
+    }
 
-  formData.append("userId", "ssafy");
-  formData.append("subject", subjectValue.value);
-  formData.append("content", contentValue.value);
-  // formData.append("restos", JSON.stringify(resData));
+    formData.append("userId", memberStore.getUserId);
+    formData.append("subject", subjectValue.value);
+    formData.append("content", contentValue.value);
+    // formData.append("restos", JSON.stringify(resData));
 
-  var i = 0;
-  starMap.value.forEach((value, data) => {
-    formData.append(`restos[${i}].restoApiId`, data.restoApiId);
-    formData.append(`restos[${i}].restoName`, data.restoName);
-    formData.append(`restos[${i}].restoPhone`, data.restoPhone);
-    formData.append(`restos[${i}].category`, data.category);
-    formData.append(`restos[${i}].address`, data.address);
-    formData.append(`restos[${i}].latitude`, data.latitude);
-    formData.append(`restos[${i}].longitude`, data.longitude);
-    i++;
-    // ... append other RestoDto fields
-  });
+    var i = 0;
+    starMap.value.forEach((value, data) => {
+      formData.append(`restos[${i}].restoApiId`, data.restoApiId);
+      formData.append(`restos[${i}].restoName`, data.restoName);
+      formData.append(`restos[${i}].restoPhone`, data.restoPhone);
+      formData.append(`restos[${i}].category`, data.category);
+      formData.append(`restos[${i}].address`, data.address);
+      formData.append(`restos[${i}].latitude`, data.latitude);
+      formData.append(`restos[${i}].longitude`, data.longitude);
+      i++;
+      // ... append other RestoDto fields
+    });
 
-  selectLocation.value.forEach((data, index) => {
-    formData.append(`tags[${index}]`, data);
-  });
-  // formData.append("registerTime", "");
-  // formData.append("content", JSON.stringify(restoMap.value));
+    selectLocation.value.forEach((data, index) => {
+      formData.append(`tags[${index}]`, data);
+    });
 
-  // // .post("/mapresto", restoMap.value)
-  axios
-    .post("http://localhost:9090/mapresto/reg", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        // "Content-Type": "application/json;charset=utf-8",
+    registMapResto(
+      formData,
+      ({ data }) => {
+        console.log("data: ", data);
+        router.push({ name: "mapresto-list" });
       },
-    })
-    // {
-    //   params: restoMap.value,
-    //   // params: postData.value,
-    // })
-    .then((response) => {
-      console.log(response);
-      router.push({ name: "mapresto-list" });
-    })
-    .catch((error) => console.log(error));
+      (error) => console.log("registMapResto error: ", error)
+    );
+  }
 };
 </script>
 
@@ -585,13 +567,14 @@ const makeMap = () => {
             placeholder="Search"
             id="searchInput"
             v-model="searchValue"
+            @keyup.enter="searchPlace"
           />
           <div class="input-group-append">
             <button
               class="btn btn-primary"
               type="button"
               id="searchBtn"
-              @click="searchPlace()"
+              @click="searchPlace"
             >
               Search
             </button>

@@ -16,20 +16,20 @@ export const useMemberStore = defineStore("memberStore", () => {
   const userInfo = ref({});
   const isValidToken = ref(false);
 
-  const getUserName = computed(() => userInfo.value.userName);
+  const getUserName = computed(() => {
+    if (userInfo.value == null) {
+      return null;
+    } else {
+      return userInfo.value.userName;
+    }
+  });
   const getUserId = computed(() => {
     if (userInfo.value == null) {
-      return "";
+      return null;
     } else {
       return userInfo.value.userId;
     }
   });
-  // const getUserId = computed(() => userInfo.value.userId);
-
-  // = computed(() => {
-  //   console.log("memberStore - getUerName : " + userInfo.value);
-  //   return userInfo.value.userName;
-  // });
 
   // loginUser : id, password
   const userLogin = async (loginUser) => {
@@ -55,7 +55,7 @@ export const useMemberStore = defineStore("memberStore", () => {
         isLogin.value = false;
         isLoginError.value = true;
         isValidToken.value = false;
-        console.error(error);
+        // console.log(error);
       }
     );
   };

@@ -5,7 +5,7 @@ const form = formAxios();
 
 // 맛지도 게시물 목록 가져오기
 function listMapResto(mapRestoParam, success, fail) {
-  local.post(`/mapresto/list`,mapRestoParam).then(success).catch(fail);
+  local.post(`/mapresto/list`, mapRestoParam).then(success).catch(fail);
 }
 
 // 좋아요 값 변경
@@ -35,10 +35,7 @@ function getMapRestoView(maprestono, success, fail) {
 }
 
 function getMapRestos(args, success, fail) {
-  local
-      .get(`/mapresto/userResto`, { params: { mapRestoNo: args } })
-      .then(success)
-      .catch(fail);
+  local.get(`/mapresto/userResto/${args}`).then(success).catch(fail);
 }
 
 // 맛지도에 저장한 식당들 가져오기
@@ -61,5 +58,5 @@ export {
   getMapRestoView,
   // getUserMapResto,
   // captureImg
-  getMapRestos
+  getMapRestos,
 };
