@@ -315,7 +315,7 @@ const clicking = () => {
   console.log("clicking !!!", mapRestoNo);
 };
 const getRestos = (args) => {
-  console.log("수신 >> ", args);
+  console.log("수신 >> ", args[1]);
   // api 요청
   getMapRestos(
     args[1],
@@ -581,7 +581,12 @@ const makeMap = () => {
               </div>
               <div class="card-body">
                 <div class="thumbnail-container">
-                  <img class="thumbnail" :src="webMapRestImg" alt="사진 없음" />
+                  <img
+                    class="thumbnail"
+                    :src="webMapRestImg"
+                    alt="사진 없음"
+                    style="height: 300px"
+                  />
                 </div>
                 <div>
                   <input type="file" @change="onFileSelected" />
