@@ -1,12 +1,13 @@
 <script setup>
 import { useRoute } from "vue-router";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref, toRaw, watch } from "vue";
 import { getMapRestoView } from "@/api/map-resto.js";
 
 const route = useRoute();
 const { maprestono } = route.params;
 
-const mapRestoView = ref({}); // 맛지도에 대한 설명 저장
+const mapRestoView = ref({ fileInfo: "default" }); // 맛지도에 대한 설명 저장
+const imageKey = ref(0);
 const restoList = ref([]); // 맛지도에 저장된 식당들 저장
 
 // 카카오 맵 관련
@@ -20,20 +21,22 @@ const bounds = ref(); // 마커에 따른 지도 범위 !!
 const STAR_IMG =
   "https://user-images.githubusercontent.com/70050038/284016597-7a30594e-bf67-454b-af93-17b100054d02.png";
 
-  const restoData = ref([])
+const restoData = ref([]);
 const starMap = ref(new Map());
 
+watch(mapRestoView, (newValue, oldValue) => {
+  console.log("값이 변경되었습니다:", newValue);
+  imageKey.value += 1;
+});
+
 const displayMarker = (data) => {
-  console.log("data :::", data)
+  console.log("data :::", data);
   starMap.value.set(data.restoApiId, [
     data,
     new kakao.maps.Marker({
       map: toRaw(map.value),
       position: new kakao.maps.LatLng(data.latitude, data.longitude),
-      image: new kakao.maps.MarkerImage(
-        STAR_IMG,
-        new kakao.maps.Size(31, 35)
-      ),
+      image: new kakao.maps.MarkerImage(STAR_IMG, new kakao.maps.Size(31, 35)),
     }),
   ]);
   const marker = starMap.value.get(data.restoApiId)[1];
@@ -69,7 +72,9 @@ const displayMarker = (data) => {
     infowindow.value.open(map.value, marker);
   });
 
-  console.log("end", starMap.value)
+  console.log("end", starMap.value);
+  console.log(data.latitude, data.longitude);
+  bounds.value.extend(new kakao.maps.LatLng(data.latitude, data.longitude));
 };
 const initMap = () => {
   // 인포윈도우 생성
@@ -78,8 +83,8 @@ const initMap = () => {
   // 맵 생성
   const container = document.getElementById("map");
   const options = {
-    center: new kakao.maps.LatLng(37.50378611, 127.0248221),
-    level: 3,
+    center: new kakao.maps.LatLng(36.00378611, 127.8248221),
+    level: 13,
   };
 
   map.value = new kakao.maps.Map(container, options);
@@ -89,9 +94,31 @@ const initMap = () => {
   const zoomControl = new kakao.maps.ZoomControl();
   map.value.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
   // end add control
+
+  bounds.value = new kakao.maps.LatLngBounds();
 };
-onMounted(() => {
-getMapResto()
+onMounted(async () => {
+  // 맛지도에 대한 제목, 작성자, 내용, 작성 날짜, 식당들
+  const getMapResto = () => {
+    getMapRestoView(
+      maprestono,
+      ({ data }) => {
+        mapRestoView.value = data.mapResto; // 식당 제외 맛지도 데이터
+        restoList.value = data.userRestoList;
+        console.log("getMapResto data: ", data.value);
+        console.log("resto list ::", restoList.value);
+
+        for (const item of restoList.value) {
+          restoData.value.push(item);
+        }
+        console.log("????", restoData.value);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  };
+  await getMapResto();
   // kakao api library를 가져오는 부분, kakao.maps를 통해 map method 접근
   const script = document.createElement("script");
 
@@ -105,77 +132,55 @@ getMapResto()
   document.head.appendChild(script);
 });
 
-const setBounds = () => {
-  console.log("set bounds ", starMap.value.get())
-  bounds.value = new kakao.maps.LatLngBounds();
-
-  for (const value of restoData.value) {
-    console.log(value); // 순서대로 엔트리를 출력합니다.
-    bounds.value.extend(
-      new kakao.maps.LatLng(value.latitude, value.longitude)
-    );
-  }
-}
-
-// 맛지도에 대한 제목, 작성자, 내용, 작성 날짜, 식당들
-const getMapResto = () => {
-  getMapRestoView(
-    maprestono,
-    ({ data }) => {
-      mapRestoView.value = data.mapResto; // 식당 제외 맛지도 데이터
-      restoList.value = data.userRestoList;
-      console.log("getMapResto data: ", data);
-      console.log("resto list ::", restoList.value)
-
-      for (const item of restoList.value) {
-        restoData.value.push(item)
-      }
-      console.log("????",restoData.value)
-    },
-    (error) => {
-      console.error(error);
-    }
-  );
-};
-
 const display = () => {
-  console.log("!!!!" ,restoData.value)
+  console.log("!!!!", restoData.value);
   for (const item of restoData.value) {
-    displayMarker(item)
+    displayMarker(item);
   }
 
-  setBounds()
-}
+  map.value.setBounds(bounds.value);
+};
 </script>
 
 <template>
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-12">
-        <h2 class="my-3 py-3 shadow-sm bg-light text-center">
-          <mark class="sky">맛지도 View</mark>
-        </h2>
-      </div>
+    <div class="row">
       <div class="col-lg-6">
         <div id="map"></div>
       </div>
       <div class="col-lg-6">
         <div class="card mb-3">
-          <div v-if="mapRestoView.fileInfo != null" >
-            <img :src="`/src/assets/${mapRestoView.fileInfo.saveFolder}/${mapRestoView.fileInfo.saveFile}`" class="card-img-top" alt="..." style="height: 55vh;"/>
-
+          <div v-if="mapRestoView.fileInfo != null">
+            <img
+              :src="`/src/assets/${mapRestoView.fileInfo.saveFolder}/${mapRestoView.fileInfo.saveFile}`"
+              class="card-img-top"
+              alt="..."
+              style="height: 55vh"
+            />
+          </div>
+          <div v-else>
+            <img
+              :key="imageKey"
+              src="https://user-images.githubusercontent.com/70050038/285240337-166b088b-584e-48a2-9e7b-356f9913b2c6.png"
+              class="card-img-top"
+              alt="..."
+              style="height: 55vh"
+            />
           </div>
           <div class="card-body" style="height: 20vh">
-            <p class="card-text d-flex justify-content-end">{{ mapRestoView.userId }}</p>
-
-            <h5 class="card-title">{{ mapRestoView.subject }}</h5>
-            <p class="card-text">
+            <div class="btn btn-outline-secondary" @click="display">
+              식당 가져오기
+            </div>
+            <div
+              class="card-text d-flex justify-content-end"
+              style="font-weight: bolder"
+            >
+              {{ mapRestoView.userId }}
+            </div>
+            <div class="card-title">{{ mapRestoView.subject }}</div>
+            <div class="card-text">
               <div>{{ mapRestoView.content }}</div>
-              <small class="text-body-secondary">
-                register time : {{ mapRestoView.registerTime }}</small
-              >
-              <div class="btn" @click="display">식당 가져오기</div>
-            </p>
+            </div>
           </div>
         </div>
       </div>

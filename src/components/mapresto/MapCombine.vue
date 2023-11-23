@@ -656,19 +656,17 @@ const makeMap = () => {
         </div>
       </div>
     </div>
-    <div class="container" v-if="!show">
+    <div class="" v-if="!show" style="margin: 5%">
       <div class="row">
         <div class="col-12">
-          <h2
-            class="my-1 py-1 shadow-sm bg-light text-center"
-            style="height: 50px"
-          >
-            <mark class="sky">지도 Combine</mark>
-          </h2>
-
           <div
-            class="btn btn-primary mt-2 mb-2"
-            style="width: 100px; margin: 0px 0px 0px 87%"
+            class="btn btn-outline-primary btn-sm mt-2 mb-2"
+            style="
+              width: 100px;
+              margin: 0px 0px 0px 85%;
+              position: fixed;
+              top: 15%;
+            "
             @click.prevent="clickButton(!show)"
           >
             등록하기
@@ -696,24 +694,14 @@ const makeMap = () => {
               <!-- right side -->
               <!-- 나의 지도 리스트 -->
               <div id="mapList" class="col-4">
-                <div class="row" style="overflow-y: auto">
+                <div class="row">
                   <h3 class="text-center" style="height: 30px">
                     나의 지도 리스트
                   </h3>
-                  <ul class="mapRestoCard">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                      "
-                    >
-                      <img
-                        src="@/assets/img/left.png"
-                        class="pre-button"
-                        @click="prePageMySelect"
-                      />
-                    </div>
+                  <div
+                    class="mapRestoCard"
+                    style="height: 30vh; overflow-y: auto"
+                  >
                     <!-- <button class="mapPage">pre</button> -->
                     <MapRestoCombineListItem
                       v-for="mapResto in myMapList"
@@ -731,42 +719,18 @@ const makeMap = () => {
                     >
                     </MapRestoCombineListItem>
                     <!-- <button class="mapPage">next</button> -->
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                      "
-                    >
-                      <img
-                        src="@/assets/img/right.png"
-                        class="next-button"
-                        @click="nextPageMySelect"
-                      />
-                    </div>
-                  </ul>
+                  </div>
                 </div>
 
                 <!-- 북마크 지도 리스트 -->
-                <div class="row" style="overflow-y: auto">
+                <div class="row">
                   <h3 class="text-center" style="height: 30px">
                     좋아 지도 리스트
                   </h3>
-                  <ul class="mapRestoCard">
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                      "
-                    >
-                      <img
-                        src="@/assets/img/left.png"
-                        class="pre-button"
-                        @click="prePageLikeSelect"
-                      />
-                    </div>
-
+                  <div
+                    class="mapRestoCard"
+                    style="height: 28vh; overflow-y: auto"
+                  >
                     <!-- <button class="mapPage">pre</button> -->
                     <MapRestoCombineListItem
                       v-for="mapResto in likeMapList"
@@ -784,34 +748,23 @@ const makeMap = () => {
                     >
                     </MapRestoCombineListItem>
                     <!-- <button class="mapPage">next</button> -->
-                    <div
-                      style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                      "
-                    >
-                      <img
-                        src="@/assets/img/right.png"
-                        class="next-button"
-                        @click="nextPageLikeSelect"
-                      />
-                    </div>
-                  </ul>
+                  </div>
                 </div>
               </div>
               <div
                 id="restoList"
                 class="col-2"
-                style="height: 75vh; overflow-y: auto"
+                style="overflow-y: auto"
                 :style="{
                   border:
-                    starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
+                    starMap.size === 0
+                      ? '2px solid rgb(0, 0, 0, 0.2)'
+                      : '2px solid #ec8dbc',
                 }"
               >
                 <div>
-                  <h5 class="text-center" style="height: 30px">내 지도 맛집</h5>
-                  <div class="text-center">
+                  <h5 class="text-center" style="height: 5vh">내 지도 맛집</h5>
+                  <div class="text-center" style="height: 65vh">
                     <div
                       v-for="resto in Array.from(starMap.values()).map(
                         (item) => item[0]
@@ -867,21 +820,18 @@ const makeMap = () => {
 #map {
   /* width: 100%; */
   height: 75vh;
-
-  border: 2px solid rgb(124, 124, 255);
-  margin: 0 0.5em;
   border-radius: 8px;
-  padding: 20px;
+  border: 2px solid rgb(0, 0, 0, 0.2);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 10px;
 }
 
 #mapList {
-  border: 2px solid #000;
-  margin: 0 1em;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   height: 75vh;
+  border-radius: 8px;
+  border: 2px solid rgb(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding-top: 10px;
 }
 
 #restoList {
@@ -966,7 +916,7 @@ a {
   margin-bottom: 60px;
   -webkit-appearance: none;
   appearance: none;
-  background-color: #ff0081;
+  background-color: #fc59ab;
   color: #fff;
   border-radius: 4px;
   border: none;
