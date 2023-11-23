@@ -14,7 +14,6 @@ const ischekced = ref(false);
 
 const emitArgs = () => {
   ischekced.value = !ischekced.value;
-
   emit("emitArgs", [ischekced.value, mapResto.mapResto.mapRestoNo]);
   console.log(ischekced.value);
 };
@@ -23,15 +22,21 @@ watch(
   () => mapResto.count[0],
   (newValue, oldValue) => {
     if (newValue < 1) {
-      ischekced.value = !ischekced.value;
+      ischekced.value = false;
     }
+  },
+  {
+    immediate: true, // 초기 변경에도 즉시 반응하도록 설정
+    deep: true, // 객체 내부의 변경도 감지
+    // 그 외 추가 옵션들을 여기에 추가할 수 있습니다.
   }
 );
 // 변경된 값에 따라 원하는 작업을 수행할 수 있습니다.
 </script>
 
 <template>
-  <li class="marRestoCardItem">
+  <!-- <li class="marRestoCardItem"> -->
+  <div class="marRestoCardItem">
     <div
       :class="{
         checkedItem: ischekced,
@@ -41,7 +46,7 @@ watch(
       <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
       <img
         :src="`/src/assets/${mapResto.mapResto.fileInfo.saveFolder}/${mapResto.mapResto.fileInfo.saveFile}`"
-        style="width: 150px; height: 200px"
+        style="width: 15vh; height: 20vh"
         @click="emitArgs"
       />
       <div>
@@ -49,8 +54,8 @@ watch(
         <div>{{ mapResto.apiIds }}</div>
       </div>
     </div>
-    <div>{{ count[0] }}</div>
-  </li>
+  </div>
+  <!-- </li> -->
 </template>
 
 <style scoped>

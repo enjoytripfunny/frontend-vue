@@ -519,8 +519,8 @@ const axiosInstance = axios.create({
     "Content-Type": "multipart/form-data", // Content-Type을 반드시 이렇게 하여야 한다.
   },
 });
-const subjectValue = ref('');
-const contentValue = ref('');
+const subjectValue = ref("");
+const contentValue = ref("");
 
 // 만들기 버튼 클릭 이벤트
 const makeMap = () => {
@@ -529,7 +529,7 @@ const makeMap = () => {
   const formData = new FormData();
   formData.append("file", uploadImageFile.value.files[0]);
 
-  formData.append("userId", "ssafy");
+  formData.append("userId", "admin");
   formData.append("subject", subjectValue.value);
   formData.append("content", contentValue.value);
   // formData.append("restos", JSON.stringify(resData));
@@ -549,6 +549,7 @@ const makeMap = () => {
 
   selectLocation.value.forEach((data, index) => {
     formData.append(`tags[${index}]`, data);
+    window.print;
   });
   // formData.append("registerTime", "");
   // formData.append("content", JSON.stringify(restoMap.value));
