@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
-import { registerLike } from "@/api/map-resto";
-import { useMemberStore } from "@/stores/member";
+import { registerLike } from '@/api/map-resto';
+import { useMemberStore } from '@/stores/member';
 
 const mapRestoProps = defineProps({ mapResto: Object });
 const mapResto = mapRestoProps.mapResto;

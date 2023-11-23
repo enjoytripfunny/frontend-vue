@@ -4,19 +4,11 @@ import {
   listLikeMapResto,
   getMapRestos,
 } from "@/api/map-resto.js";
-import { onMounted, ref, toRaw, watch } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import MapRestoCombineListItem from "./item/MapRestoCombineListItem.vue";
 import { useRouter } from "vue-router";
 import { useMemberStore } from "@/stores/member";
-
-const swiperOptions = ref({
-  direction: "horizontal",
-  loop: true,
-});
-
-const count = {
-  count: false,
-};
+import axios from "axios";
 
 const mapRestoNo = defineEmits({ mapRestoNo: String });
 
@@ -59,6 +51,32 @@ const starMap = ref(new Map());
 const mapRestoMap = ref(new Map());
 
 // div id
+const registerModal = ref();
+
+// modal 관련
+const restos = ref([]);
+const show = ref(false);
+const subject = ref(); // 제목
+const content = ref(); // 글
+const tags = ref([]); // 지역 태그 최대 3개(서울, 대전 ...)
+const location = ref([
+  "서울",
+  "인천",
+  "대전",
+  "대구",
+  "부산",
+  "광주",
+  "울산",
+  "경기도",
+  "강원도",
+  "충청북도",
+  "충청남도",
+  "전라남도",
+  "전라북도",
+  "경상남도",
+  "경상북도",
+  "제주도",
+]);
 
 const myMapResto = () => {
   listMyMapResto(
@@ -133,8 +151,6 @@ const displayMarker = (data) => {
     });
     infowindow.value.close();
     infowindow.value.open(map.value, marker);
-
-    console.log("basic map ...", basicMap.value);
   });
 };
 const initMap = () => {
@@ -429,177 +445,391 @@ function mouseup(event) {
   console.log(`시작 좌표: (${startX.value}, ${startY.value})`);
   console.log(`끝 좌표: (${endX.value}, ${endY.value})`);
 }
+
+const clickButton = (input) => {
+  show.value = input;
+};
+
+// 등록 관련
+
+const uploadImageFile = ref(); // image source
+const webMapRestImg = ref();
+// 이미지 웹에 띄우기
+const onFileSelected = (event) => {
+  const input = event.target;
+  if (input.files /* && input.files[0] */) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadImageFile.value = input; // image source 매우 긴 영어
+      // uploadImageFile.value = e.target.result; // image source 매우 긴 영어
+      webMapRestImg.value = e.target.result;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+};
+// 선택된 지역 카테고리 배열 (서울, 대전 ...)
+const selectLocation = ref([]);
+const optionClick = (locate) => {
+  if (
+    selectLocation.value.length > 2 &&
+    !selectLocation.value.includes(locate)
+  ) {
+    return;
+  }
+
+  if (selectLocation.value.includes(locate)) {
+    selectLocation.value = selectLocation.value.filter(
+      (location) => location !== locate
+    );
+  } else {
+    selectLocation.value.push(locate);
+  }
+
+  console.log(selectLocation.value);
+};
+
+// 기본적인 설정
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:9090", // 기본 URL 설정
+  mode: "cors",
+  headers: {
+    "Content-Type": "multipart/form-data", // Content-Type을 반드시 이렇게 하여야 한다.
+  },
+});
+const subjectValue = ref("");
+const contentValue = ref("");
+
+// 만들기 버튼 클릭 이벤트
+const makeMap = () => {
+  console.log("make map !!!");
+
+  const formData = new FormData();
+  formData.append("file", uploadImageFile.value.files[0]);
+
+  formData.append("userId", "admin");
+  formData.append("subject", subjectValue.value);
+  formData.append("content", contentValue.value);
+  // formData.append("restos", JSON.stringify(resData));
+
+  var i = 0;
+  starMap.value.forEach((value, data) => {
+    formData.append(`restos[${i}].restoApiId`, data.restoApiId);
+    formData.append(`restos[${i}].restoName`, data.restoName);
+    formData.append(`restos[${i}].restoPhone`, data.restoPhone);
+    formData.append(`restos[${i}].category`, data.category);
+    formData.append(`restos[${i}].address`, data.address);
+    formData.append(`restos[${i}].latitude`, data.latitude);
+    formData.append(`restos[${i}].longitude`, data.longitude);
+    i++;
+    // ... append other RestoDto fields
+  });
+
+  selectLocation.value.forEach((data, index) => {
+    formData.append(`tags[${index}]`, data);
+    window.print;
+  });
+  // formData.append("registerTime", "");
+  // formData.append("content", JSON.stringify(restoMap.value));
+
+  // // .post("/mapresto", restoMap.value)
+  axios
+    .post("http://localhost:9090/mapresto/reg", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        // "Content-Type": "application/json;charset=utf-8",
+      },
+    })
+    // {
+    //   params: restoMap.value,
+    //   // params: postData.value,
+    // })
+    .then((response) => {
+      console.log(response);
+      router.push({ name: "mapresto-list" });
+    })
+    .catch((error) => console.log(error));
+
+  router.push("/");
+};
 </script>
 
 <template>
-  <ChildComponent @custom-event="handleCustomEvent" />
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-12">
-        <h2 class="my-3 py-3 shadow-sm bg-light text-center">
-          <mark class="sky">지도 Combine</mark>
-        </h2>
-      </div>
-      <div class="">
+  <div>
+    <div class="black-bg" v-if="show">
+      <div>
         <div class="row justify-content-center">
-          <!-- left side -->
-          <div class="row">
-            <div class="col-5">
-              <div class="map_wrap">
+          <div class="col-md-11">
+            <div class="card" style="height: 50vh; overflow-y: auto">
+              <div class="card-header">
                 <div
-                  id="map"
-                  :class="{ notHasMarker: starMap.size === 0 ? true : false }"
-                  style="position: relative; overflow: hidden"
-                ></div>
-                <ul id="category" style="margin-left: 20px">
-                  <li id="FD6" data-order="0" class="restaurant">음식점</li>
-                  <li id="CE7" data-order="0" class="cafe">카페</li>
-                  <li id="">X</li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- right side -->
-            <!-- 나의 지도 리스트 -->
-            <div id="mapList" class="col-4">
-              <div class="row" style="overflow-y: auto">
-                <h3 class="text-center">나의 지도 리스트</h3>
-                <ul class="mapRestoCard">
-                  <!-- <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      height: 90%;
-                    "
-                  >
-                    <img
-                      src="@/assets/img/left.png"
-                      class="pre-button"
-                      @click="prePageMySelect"
-                    />
-                  </div> -->
-                  <!-- <button class="mapPage">pre</button> -->
-                  <MapRestoCombineListItem
-                    v-for="mapResto in myMapList"
-                    :key="mapResto.mapRestoNo"
-                    :value="mapResto.restoApiId"
-                    :mapResto="mapResto"
-                    draggable="true"
-                    @some-event="clicking"
-                    @emit-args="getRestos"
-                    :count="
-                      mapRestoMap.get(mapResto.mapRestoNo) != null
-                        ? mapRestoMap.get(mapResto.mapRestoNo)
-                        : [0, null]
-                    "
-                  >
-                  </MapRestoCombineListItem>
-                  <!-- <button class="mapPage">next</button> -->
-                  <!-- <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      height: 90%;
-                    "
-                  >
-                    <img
-                      src="@/assets/img/right.png"
-                      class="next-button"
-                      @click="nextPageMySelect"
-                    />
-                  </div> -->
-                </ul>
-              </div>
-
-              <!-- 북마크 지도 리스트 -->
-              <div class="row" style="overflow-y: auto">
-                <h3 class="text-center">좋아 지도 리스트</h3>
-                <ul class="mapRestoCard">
-                  <!-- <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      height: 90%;
-                    "
-                  >
-                    <img
-                      src="@/assets/img/left.png"
-                      class="pre-button"
-                      @click="prePageLikeSelect"
-                    />
-                  </div> -->
-
-                  <!-- <button class="mapPage">pre</button> -->
-                  <MapRestoCombineListItem
-                    v-for="mapResto in likeMapList"
-                    :key="mapResto.mapRestoNo"
-                    :value="mapResto.restoApiId"
-                    :mapResto="mapResto"
-                    draggable="true"
-                    @some-event="clicking"
-                    @emit-args="getRestos"
-                    :count="
-                      mapRestoMap.get(mapResto.mapRestoNo) != null
-                        ? mapRestoMap.get(mapResto.mapRestoNo)
-                        : [0, null]
-                    "
-                  >
-                  </MapRestoCombineListItem>
-                  <!-- <button class="mapPage">next</button> -->
-                  <!-- <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      height: 90%;
-                    "
-                  >
-                    <img
-                      src="@/assets/img/right.png"
-                      class="next-button"
-                      @click="nextPageLikeSelect"
-                    />
-                  </div> -->
-                </ul>
-              </div>
-            </div>
-            <div
-              id="restoList"
-              class="col-2"
-              style="height: 75vh; overflow-y: auto"
-              :style="{
-                border:
-                  starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
-              }"
-            >
-              <div class="text-center" style="margin-top: 10px">
-                내 지도 맛집
-              </div>
-              <div>
-                <div
-                  v-for="resto in Array.from(starMap.values()).map(
-                    (item) => item[0]
-                  )"
-                  :key="resto.restoApiId"
-                  :value="resto.restoApiId"
-                  class="list-item badge-item confetti-button"
-                  style="line-height: 200%; margin: 10px 0"
-                  @click.prevent="itemClick(resto.restoApiId)"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
                 >
-                  <div class="item-container">
-                    <div class="" style="padding: 5px">
-                      {{ resto.restoName }}
+                  <span class="text-center" style="padding-left: 40%"
+                    >나만의 지도 만들기</span
+                  >
+                  <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @click="() => (show = !show)"
+                  ></button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="thumbnail-container">
+                  <img class="thumbnail" :src="webMapRestImg" alt="사진 없음" />
+                </div>
+                <div>
+                  <input type="file" @change="onFileSelected" />
+                </div>
+                <form action="">
+                  <div class="mb-3">
+                    <label for="subject" class="form-label">글 제목</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="subject"
+                      placeholder="제목 입력"
+                      v-model="subjectValue"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="content" class="form-label">글</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="content"
+                      placeholder="글 입력"
+                      v-model="contentValue"
+                    />
+                  </div>
+
+                  <!-- location options start -->
+                  <label>지역 태그 선택</label>
+                  <div id="selectLocation" class="select-options mb-3">
+                    <button
+                      v-for="(locate, index) in location"
+                      :key="index"
+                      :value="locate"
+                      :class="[
+                        'btn',
+                        'rounded-pill',
+                        'slide-item',
+                        {
+                          'btn-secondary': !selectLocation.includes(locate),
+                          'btn-primary': selectLocation.includes(locate),
+                        },
+                      ]"
+                      @click.prevent="optionClick(locate)"
+                    >
+                      {{ locate }}
+                    </button>
+                  </div>
+                  <div id="selectCategory"></div>
+                  <!-- location options end -->
+
+                  <div class="d-flex justify-content-end">
+                    <button
+                      type=""
+                      class="btn btn-primary mb-3"
+                      data-bs-toggle=""
+                      data-bs-target="#exampleModal"
+                      id="loginbtn"
+                      @click.prevent="makeMap"
+                    >
+                      만들기
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container" v-if="!show">
+      <div class="row">
+        <div class="col-12">
+          <h2
+            class="my-1 py-1 shadow-sm bg-light text-center"
+            style="height: 50px"
+          >
+            <mark class="sky">지도 Combine</mark>
+          </h2>
+
+          <div
+            class="btn btn-primary mt-2 mb-2"
+            style="width: 100px; margin: 0px 0px 0px 87%"
+            @click.prevent="clickButton(!show)"
+          >
+            등록하기
+          </div>
+        </div>
+        <div class="">
+          <div class="row justify-content-center">
+            <!-- left side -->
+            <div class="row">
+              <div class="col-5">
+                <div class="map_wrap">
+                  <div
+                    id="map"
+                    :class="{ notHasMarker: starMap.size === 0 ? true : false }"
+                    style="position: relative; overflow: hidden"
+                  ></div>
+                  <ul id="category" style="margin-left: 20px">
+                    <!-- <li id="FD6" data-order="0" class="restaurant">음식점</li>
+                  <li id="CE7" data-order="0" class="cafe">카페</li>
+                  <li id="">X</li> -->
+                  </ul>
+                </div>
+              </div>
+
+              <!-- right side -->
+              <!-- 나의 지도 리스트 -->
+              <div id="mapList" class="col-4">
+                <div class="row" style="overflow-y: auto">
+                  <h3 class="text-center" style="height: 30px">
+                    나의 지도 리스트
+                  </h3>
+                  <ul class="mapRestoCard">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <img
+                        src="@/assets/img/left.png"
+                        class="pre-button"
+                        @click="prePageMySelect"
+                      />
+                    </div>
+                    <!-- <button class="mapPage">pre</button> -->
+                    <MapRestoCombineListItem
+                      v-for="mapResto in myMapList"
+                      :key="mapResto.mapRestoNo"
+                      :value="mapResto.restoApiId"
+                      :mapResto="mapResto"
+                      draggable="true"
+                      @some-event="clicking"
+                      @emit-args="getRestos"
+                      :count="
+                        mapRestoMap.get(mapResto.mapRestoNo) != null
+                          ? mapRestoMap.get(mapResto.mapRestoNo)
+                          : [0, null]
+                      "
+                    >
+                    </MapRestoCombineListItem>
+                    <!-- <button class="mapPage">next</button> -->
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <img
+                        src="@/assets/img/right.png"
+                        class="next-button"
+                        @click="nextPageMySelect"
+                      />
+                    </div>
+                  </ul>
+                </div>
+
+                <!-- 북마크 지도 리스트 -->
+                <div class="row" style="overflow-y: auto">
+                  <h3 class="text-center" style="height: 30px">
+                    좋아 지도 리스트
+                  </h3>
+                  <ul class="mapRestoCard">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <img
+                        src="@/assets/img/left.png"
+                        class="pre-button"
+                        @click="prePageLikeSelect"
+                      />
                     </div>
 
-                    <button
-                      type="button"
-                      class="btn-close"
-                      aria-label="close"
-                      @click.prevent="deletePlace(resto)"
-                    ></button>
+                    <!-- <button class="mapPage">pre</button> -->
+                    <MapRestoCombineListItem
+                      v-for="mapResto in likeMapList"
+                      :key="mapResto.mapRestoNo"
+                      :value="mapResto.restoApiId"
+                      :mapResto="mapResto"
+                      draggable="true"
+                      @some-event="clicking"
+                      @emit-args="getRestos"
+                      :count="
+                        mapRestoMap.get(mapResto.mapRestoNo) != null
+                          ? mapRestoMap.get(mapResto.mapRestoNo)
+                          : [0, null]
+                      "
+                    >
+                    </MapRestoCombineListItem>
+                    <!-- <button class="mapPage">next</button> -->
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <img
+                        src="@/assets/img/right.png"
+                        class="next-button"
+                        @click="nextPageLikeSelect"
+                      />
+                    </div>
+                  </ul>
+                </div>
+              </div>
+              <div
+                id="restoList"
+                class="col-2"
+                style="height: 75vh; overflow-y: auto"
+                :style="{
+                  border:
+                    starMap.size === 0 ? '2px solid #000' : '2px solid #ec8dbc',
+                }"
+              >
+                <div>
+                  <h5 class="text-center" style="height: 30px">내 지도 맛집</h5>
+                  <div class="text-center">
+                    <div
+                      v-for="resto in Array.from(starMap.values()).map(
+                        (item) => item[0]
+                      )"
+                      :key="resto.restoApiId"
+                      :value="resto.restoApiId"
+                      class="list-item badge-item confetti-button"
+                      style="line-height: 200%; margin: 10px 0"
+                      @click.prevent="itemClick(resto.restoApiId)"
+                    >
+                      <div class="item-container">
+                        <div class="" style="padding: 5px">
+                          {{ resto.restoName }}
+                        </div>
+
+                        <button
+                          type="button"
+                          class="btn-close"
+                          aria-label="close"
+                          @click.prevent="deletePlace(resto)"
+                        ></button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -612,6 +842,23 @@ function mouseup(event) {
 </template>
 
 <style scoped>
+.black-bg {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  padding: 20vh;
+  margin: 0 auto;
+}
+.white-bg {
+  width: 70vh;
+  height: 50vh;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  z-index: -10;
+  margin: auto;
+}
 #map {
   /* width: 100%; */
   height: 75vh;
@@ -629,6 +876,7 @@ function mouseup(event) {
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  height: 75vh;
 }
 
 #restoList {
@@ -718,7 +966,6 @@ a {
   border-radius: 4px;
   border: none;
   cursor: pointer;
-  position: relative;
   width: 100%;
   transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
   box-shadow: 0 2px 25px rgba(255, 0, 130, 0.5);
