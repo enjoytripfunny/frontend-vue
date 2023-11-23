@@ -11,10 +11,12 @@ const mapResto = defineProps({
 const emit = defineEmits(["someEvent", "emitArgs"]);
 
 const ischekced = ref(false);
+const restoInfo = ref("default");
 
 const emitArgs = () => {
   ischekced.value = !ischekced.value;
   emit("emitArgs", [ischekced.value, mapResto.mapResto.mapRestoNo]);
+  restoInfo.value = mapResto.mapResto;
   console.log(ischekced.value);
 };
 
@@ -43,12 +45,13 @@ watch(
         notChecked: !ischekced,
       }"
     >
-      <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
       <img
-        :src="`/src/assets/${mapResto.mapResto.fileInfo.saveFolder}/${mapResto.mapResto.fileInfo.saveFile}`"
+        src="`/src/assets/${mapResto.mapResto.fileInfo.saveFolder}/${mapResto.mapResto.fileInfo.saveFile}`"
         style="width: 20vh; height: 21vh"
         @click="emitArgs"
       />
+      <!-- <img src="@/assets/img/suwon2.jpg" style="width: 230px; height: 230px" /> -->
+
       <div style="margin: 5%">
         <div id="topic">
           {{ mapResto.mapResto.subject }}

@@ -78,7 +78,7 @@ const location = ref([
   "제주도",
 ]);
 
-const myMapResto = () => {
+const myMapResto = async () => {
   listMyMapResto(
     {
       num: myMapPage.value,
@@ -93,7 +93,7 @@ const myMapResto = () => {
   );
 };
 
-const likeMapResto = () => {
+const likeMapResto = async () => {
   listLikeMapResto(
     {
       num: likeMapPage.value,
@@ -225,9 +225,9 @@ const initMap = () => {
     console.log("baisc map after search ", basicMap.value);
   }
 };
-onMounted(() => {
-  myMapResto();
-  likeMapResto();
+onMounted(async () => {
+  await myMapResto();
+  await likeMapResto();
 
   // kakao api library를 가져오는 부분, kakao.maps를 통해 map method 접근
   const script = document.createElement("script");
@@ -325,7 +325,7 @@ const getRestos = (args) => {
       data.userRestoList.forEach((item) => restoIds.push(item.restoApiId));
 
       mapRestoMap.value.set(args[1], [restoIds.length, restoIds]);
-      console.log(mapRestoMap.value);
+      console.log("map resto map", mapRestoMap.value);
 
       // 마커 가져와서 찍기
       data.userRestoList.forEach((data) => {
