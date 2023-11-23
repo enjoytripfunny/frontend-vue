@@ -25,6 +25,9 @@ const mapRestoParam = ref({
   userId: memberStore.getUserId,
   num: listCount.value,
   total: totalMapResto.value,
+  checkUserId: "",//나의 맛지도만 불러오기
+    orderkey: "like_count",//정렬할 키
+    ordervalue: "desc"//내림차순, 오름차순
 });
 
 onMounted(() => {
@@ -58,11 +61,6 @@ const addList = () => {
 <template>
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <h2 class="my-3 py-3 shadow-sm bg-light text-center">
-          <mark class="sky">맛지도</mark>
-        </h2>
-      </div>
       <div class="col-lg-10">
         <div class="row align-self-center mb-2">
           <div class="col-md-5 offset-5">
