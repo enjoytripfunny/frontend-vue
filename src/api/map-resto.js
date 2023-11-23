@@ -42,7 +42,7 @@ function getMapRestoView(maprestono, success, fail) {
 
 function getMapRestos(args, success, fail) {
   local
-    .get(`/mapresto/userResto`, { params: { mapRestoNo: args } })
+    .get(`/mapresto/userResto/${args}`)
     .then(success)
     .catch(fail);
 }
